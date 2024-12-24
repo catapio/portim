@@ -1,0 +1,9 @@
+export class CommonError extends Error {
+    statusCode: number
+
+    constructor(message: string, name = "Bad Request", statusCode = 400) {
+        super(message)
+        this.statusCode = statusCode
+        this.name = name
+    }
+}

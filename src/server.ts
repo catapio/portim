@@ -1,4 +1,4 @@
-import { fastify } from "fastify"
+import { fastify, RouteOptions } from "fastify"
 import { fastifyCors } from "@fastify/cors"
 import { validatorCompiler, serializerCompiler, ZodTypeProvider, jsonSchemaTransform } from "fastify-type-provider-zod"
 import { fastifySwagger } from "@fastify/swagger"
@@ -7,13 +7,43 @@ import path from "node:path"
 import fs from "node:fs"
 import { logger } from "./utils/logger"
 import { randomUUID } from "node:crypto"
-import { routes } from "./routes"
+import { userRoutes } from "./routes/users"
+import { Supabase } from "./providers/auth/supabase"
+import { UserService } from "./services/users"
+import { authRoutes } from "./routes/auth"
+import z from "zod"
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
+
+const defaultSchema = {
+    response: {
+        400: z.object({
+            statusCode: z.number(),
+            error: z.string(),
+            message: z.string()
+        }).describe("Expected error"),
+        500: z.object({
+            statusCode: z.number(),
+            error: z.string(),
+            message: z.string()
+        }).describe("Unexpected error"),
+    },
+};
 
 // setup zod
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
+
+app.addHook('onRoute', (routeOptions: RouteOptions) => {
+    routeOptions.schema = {
+        ...defaultSchema,
+        ...routeOptions.schema,
+        response: {
+            ...defaultSchema.response,
+            ...routeOptions.schema?.response as Record<number, unknown>,
+        },
+    };
+});
 
 // middleware to add id in request
 app.addHook("onRequest", async (request) => {
@@ -75,7 +105,34 @@ app.register(fastifySwaggerUi, {
     }
 })
 
-app.register(routes)
+// create dependencies
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+    logger.error("not found variabels of supabase")
+    process.exit(1)
+}
+const auth = new Supabase(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
+const userService = new UserService(auth)
+
+authRoutes(app)
+app.register((app) => userRoutes(app, userService))
+
+app.setErrorHandler((error, request, reply) => {
+    if (!error.statusCode || error.statusCode === 500) {
+        const errorResponse = {
+            statusCode: 500,
+            error: "Internal Server Error",
+            message: `An unexpected error occurred. Please try again later. id: ${request.id}`,
+        };
+        logger.error(error);
+        reply.status(500).send(errorResponse);
+    } else {
+        reply.status(error.statusCode).send({
+            statusCode: error.statusCode,
+            error: error.name === "Error" ? "Bad Request" : error.name || "Bad Request",
+            message: error.message,
+        });
+    }
+});
 
 // start
 if (!process.env.PORT) logger.warn("PORT not defined. setting 3000")
