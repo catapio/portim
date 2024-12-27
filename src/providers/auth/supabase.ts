@@ -55,4 +55,20 @@ export class Supabase implements Auth {
             expiresIn: result.data.session.expires_in,
         }
     }
+
+    async authorize(token: string) {
+        const result = await this.client.auth.getUser(token)
+
+        if (result.error) {
+            throw new CommonError(result.error.message, "Unauthorized", 401)
+        }
+
+        return {
+            user: {
+                id: result.data.user.id,
+                email: result.data.user.email,
+                metadata: result.data.user.user_metadata
+            }
+        }
+    }
 }

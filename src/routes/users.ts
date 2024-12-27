@@ -6,8 +6,9 @@ import { User } from "../entities/User";
 export async function userRoutes(app: FastifyTypedInstance, userService: IUserService) {
     app.post("/users/signup", {
         schema: {
-            tags: ["users"],
+            tags: ["Users"],
             description: "Create a new user",
+            consumes: ['application/x-www-form-urlencoded'],
             body: z.object({
                 firstName: z.string(),
                 lastName: z.string(),
@@ -41,11 +42,12 @@ export async function userRoutes(app: FastifyTypedInstance, userService: IUserSe
 
     app.post("/users/signin", {
         schema: {
-            tags: ["users"],
+            tags: ["Users"],
             description: "Authenticate user",
+            consumes: ['application/x-www-form-urlencoded'],
             body: z.object({
                 email: z.string().email(),
-                password: z.string(),
+                password: z.string().describe("**HERE IN SWAGGER YOUR PASSWORD WILL BE SHOWN**"),
             }),
             response: {
                 201: z.object({

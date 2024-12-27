@@ -12,18 +12,21 @@ import { Supabase } from "./providers/auth/supabase"
 import { UserService } from "./services/users"
 import { authRoutes } from "./routes/auth"
 import z from "zod"
+import { projectRoutes } from "./routes/projects"
+import { Authorization } from "./middlewares/authorize"
+import fastifyFormbody from "@fastify/formbody"
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
 const defaultSchema = {
     response: {
         400: z.object({
-            statusCode: z.number(),
+            statusCode: z.number().default(400),
             error: z.string(),
             message: z.string()
         }).describe("Expected error"),
         500: z.object({
-            statusCode: z.number(),
+            statusCode: z.number().default(500),
             error: z.string(),
             message: z.string()
         }).describe("Unexpected error"),
@@ -75,13 +78,26 @@ app.addHook("onResponse", async (request, reply) => {
 // cors
 app.register(fastifyCors, { origin: "*" })
 
+// form body
+app.register(fastifyFormbody)
+
 // swagger config
 app.register(fastifySwagger, {
     openapi: {
         info: {
             title: "Portim API",
             version: "1.0.0",
-        }
+        },
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                    description: "Use format: Bearer {your_token}",
+                },
+            }
+        },
     },
     transform: jsonSchemaTransform,
 })
@@ -107,14 +123,17 @@ app.register(fastifySwaggerUi, {
 
 // create dependencies
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
-    logger.error("not found variabels of supabase")
+    logger.error("not found variables of supabase")
     process.exit(1)
 }
 const auth = new Supabase(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
+const authorization = new Authorization(auth)
+
 const userService = new UserService(auth)
 
 authRoutes(app)
 app.register((app) => userRoutes(app, userService))
+app.register((app) => projectRoutes(app, authorization))
 
 app.setErrorHandler((error, request, reply) => {
     if (!error.statusCode || error.statusCode === 500) {
