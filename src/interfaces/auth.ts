@@ -1,6 +1,4 @@
-export interface SignedUp {
-    id: string
-}
+import { User } from "../entities/User"
 
 export interface SignedIn {
     tokenType: string
@@ -9,24 +7,14 @@ export interface SignedIn {
     expiresIn: number
 }
 
-export interface AuthUser {
-    id: string
-    email?: string
-    metadata: {
-        firstName: string
-        lastName: string
-        projects?: string[]
-    }
-}
-
 export interface Authorize {
-    user: AuthUser
+    user: User
 }
 
 export interface Auth {
-    signup: (email: string, firstName: string, lastName: string, password: string) => Promise<SignedUp>
+    signup: (user: User, password: string) => Promise<User>
     signin: (email: string, password: string) => Promise<SignedIn>
     authorize: (token: string) => Promise<Authorize>
-    findUser: (userId: string) => Promise<AuthUser>
-    updateUser: (userId: string, metadata: Record<string, any>) => Promise<SignedUp>
+    findUser: (userId: string) => Promise<User>
+    updateUser: (user: User) => Promise<User>
 }

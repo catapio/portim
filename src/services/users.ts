@@ -7,10 +7,10 @@ export interface UserExecuted {
 }
 
 export interface IUserService {
-    create: (user: User, password: string) => Promise<UserExecuted>
+    create: (user: User, password: string) => Promise<User>
     authenticate: (email: string, password: string) => Promise<SignedIn>
     findById: (userId: string) => Promise<User>
-    update: (userId: string, metadata: Record<string, any>) => Promise<UserExecuted>
+    update: (user: User) => Promise<UserExecuted>
 }
 
 export class UserService implements IUserService {
@@ -26,12 +26,10 @@ export class UserService implements IUserService {
     */
     async create(user: User, password: string) {
         logger.debug("signing up user")
-        const result = await this.auth.signup(user.email, user.firstName, user.lastName, password)
-        logger.debug(`signed up user. id: ${result.id}`)
+        const newUser = await this.auth.signup(user, password)
+        logger.debug(`signed up user. id: ${newUser.id}`)
 
-        return {
-            id: result.id,
-        }
+        return newUser
     }
 
     /**
@@ -52,27 +50,21 @@ export class UserService implements IUserService {
     */
     async findById(userId: string) {
         logger.debug(`fiding user. id: ${userId}`)
-        const result = await this.auth.findUser(userId)
+        const user = await this.auth.findUser(userId)
         logger.debug(`found user. id: ${userId}`)
 
-        return new User({
-            id: result.id,
-            email: result.email as string,
-            firstName: result.metadata.firstName,
-            lastName: result.metadata.lastName,
-            projects: result.metadata.projects,
-        })
+        return user
     }
 
     /**
     * Update a user and may throw an error if update fails.
     * @throws {Error} If update fails.
     */
-    async update(userId: string, metadata: Record<string, any>) {
-        logger.debug(`updating user. id: ${userId}`)
-        const result = await this.auth.updateUser(userId, metadata)
-        logger.debug(`updated user. id: ${userId}`)
+    async update(user: User) {
+        logger.debug(`updating user. id: ${user.id}`)
+        const updatedUser = await this.auth.updateUser(user)
+        logger.debug(`updated user. id: ${user.id}`)
 
-        return result
+        return updatedUser
     }
 }

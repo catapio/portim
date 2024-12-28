@@ -25,6 +25,7 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
                     createdAt: z.date(),
                     updatedAt: z.date(),
                     ownerId: z.string(),
+                    users: z.array(z.string()),
                 }).describe("Created project"),
                 401: z.object({
                     statusCode: z.number().default(401),
@@ -40,7 +41,7 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
             throw new CommonError("No user to assign project")
         }
 
-        const newProject = await projectUseCases.createProject(request.body, request.user.id, request.user.metadata)
+        const newProject = await projectUseCases.createProject(request.body, request.user)
 
         request.logger.info(`created new project. name: ${request.body.name}. id: ${newProject.id}`)
         return reply.status(201).send(newProject)
@@ -65,7 +66,8 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
                     name: z.string(),
                     createdAt: z.date(),
                     updatedAt: z.date(),
-                    ownerId: z.string()
+                    ownerId: z.string(),
+                    users: z.array(z.string())
                 }).describe("Fetched project"),
                 401: z.object({
                     statusCode: z.number().default(401),
@@ -78,6 +80,104 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
         const project = await projectUseCases.getProject(request.params)
 
         return reply.status(200).send(project)
+    })
+
+    app.patch("/projects/:projectId/addUser", {
+        preHandler: authorization.authorize,
+        schema: {
+            security: [
+                {
+                    bearerAuth: [],
+                },
+            ],
+            tags: ["Projects"],
+            description: "Add user to a project",
+            params: z.object({
+                projectId: z.string()
+            }),
+            body: z.object({
+                userId: z.string()
+            }),
+            response: {
+                200: z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    createdAt: z.date(),
+                    updatedAt: z.date(),
+                    ownerId: z.string(),
+                    users: z.array(z.string())
+                }).describe("Updated project"),
+                401: z.object({
+                    statusCode: z.number().default(401),
+                    error: z.string(),
+                    message: z.string()
+                }).describe("Unauthorized"),
+                403: z.object({
+                    statusCode: z.number().default(403),
+                    error: z.string(),
+                    message: z.string()
+                }).describe("Forbidden"),
+            }
+        }
+    }, async (request, reply) => {
+        if (!request.user) throw new CommonError("no user to identify and add user to the project")
+
+        const updatedProject = await projectUseCases.addUserToProject({
+            projectId: request.params.projectId,
+            requestUser: request.user,
+            userId: request.body.userId
+        })
+
+        return reply.status(200).send(updatedProject)
+    })
+
+    app.patch("/projects/:projectId/removeUser", {
+        preHandler: authorization.authorize,
+        schema: {
+            security: [
+                {
+                    bearerAuth: [],
+                },
+            ],
+            tags: ["Projects"],
+            description: "Add user to a project",
+            params: z.object({
+                projectId: z.string()
+            }),
+            body: z.object({
+                userId: z.string()
+            }),
+            response: {
+                200: z.object({
+                    id: z.string(),
+                    name: z.string(),
+                    createdAt: z.date(),
+                    updatedAt: z.date(),
+                    ownerId: z.string(),
+                    users: z.array(z.string())
+                }).describe("Updated project"),
+                401: z.object({
+                    statusCode: z.number().default(401),
+                    error: z.string(),
+                    message: z.string()
+                }).describe("Unauthorized"),
+                403: z.object({
+                    statusCode: z.number().default(403),
+                    error: z.string(),
+                    message: z.string()
+                }).describe("Forbidden"),
+            }
+        }
+    }, async (request, reply) => {
+        if (!request.user) throw new CommonError("no user to identify and add user to the project")
+
+        const updatedProject = await projectUseCases.removeUserOfProject({
+            projectId: request.params.projectId,
+            requestUser: request.user,
+            userId: request.body.userId
+        })
+
+        return reply.status(200).send(updatedProject)
     })
 
     app.delete("/projects/:projectId", {

@@ -10,6 +10,7 @@ export interface ProjectExecuted {
 export interface IProjectService {
     findById: (projectId: string) => Promise<Project>
     create: (project: Project) => Promise<Project>
+    update: (project: Project) => Promise<Project>
     delete: (projectId: string) => Promise<Project>
 }
 
@@ -54,6 +55,28 @@ export class ProjectService implements IProjectService {
         logger.debug(`created project in database. id: ${newProject.id}`)
 
         return new Project(newProject)
+    }
+
+    /**
+    * Updates a project and it may throw an error if update fails.
+    * @throws {Error} If the update fails.
+    */
+    async update(project: Project) {
+        try {
+            logger.debug(`updating project in database. id: ${project.id}`)
+            const projectUpdated = await this.prisma.project.update({
+                where: {
+                    id: project.id
+                },
+                data: project
+            })
+            logger.debug(`updated project in database. id: ${projectUpdated.id}`)
+
+            return new Project(projectUpdated)
+        } catch (err) {
+            logger.error(err)
+            throw new CommonError("Not found project to update")
+        }
     }
 
     /**

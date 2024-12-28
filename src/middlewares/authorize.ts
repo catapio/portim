@@ -31,7 +31,7 @@ export class Authorization {
         request.user = user
 
         const params = request.params as { projectId: string }
-        if (params.projectId && !user.metadata.projects.includes(params.projectId)) {
+        if (params.projectId && !user.projects.includes(params.projectId)) {
             throw new CommonError("You cannot access this project", "Unauthorized", 401)
         }
 

@@ -3,7 +3,7 @@ export interface IUser {
     email: string
     firstName: string
     lastName: string
-    projects?: string[]
+    projects: string[]
 }
 
 export class User {
@@ -11,7 +11,7 @@ export class User {
     email: string
     firstName: string
     lastName: string
-    projects?: string[]
+    projects: string[]
 
     constructor({
         id,
@@ -35,5 +35,13 @@ export class User {
             lastName: this.lastName,
             projects: this.projects,
         }
+    }
+
+    addProject(projectId: string) {
+        this.projects.push(projectId)
+    }
+
+    removeProject(projectId: string) {
+        this.projects = this.projects.filter((id) => id !== projectId)
     }
 }

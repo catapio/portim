@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { Auth } from "../../interfaces/auth";
 import { CommonError } from "../../utils/commonError";
+import { User } from "../../entities/User";
 
 export class Supabase implements Auth {
     private client
@@ -9,14 +10,14 @@ export class Supabase implements Auth {
         this.client = createClient(url, key)
     }
 
-    async signup(email: string, firstName: string, lastName: string, password: string) {
+    async signup(user: User, password: string) {
         const result = await this.client.auth.signUp({
-            email,
+            email: user.email,
             password,
             options: {
                 data: {
-                    firstName,
-                    lastName,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
                 }
             }
         })
@@ -29,9 +30,9 @@ export class Supabase implements Auth {
             throw new CommonError("User not created due an unexpected error. Contact support or try again later", "Unexpected Error", 500)
         }
 
-        return {
-            id: result.data.user.id,
-        }
+        user.id = result.data.user.id
+
+        return user
     }
 
     async signin(email: string, password: string) {
@@ -64,15 +65,13 @@ export class Supabase implements Auth {
         }
 
         return {
-            user: {
+            user: new User({
                 id: result.data.user.id,
-                email: result.data.user.email,
-                metadata: {
-                    firstName: result.data.user.user_metadata.firstName,
-                    lastName: result.data.user.user_metadata.lastName,
-                    projects: result.data.user.user_metadata.projects,
-                }
-            }
+                email: result.data.user.email || "",
+                firstName: result.data.user.user_metadata.firstName,
+                lastName: result.data.user.user_metadata.lastName,
+                projects: result.data.user.user_metadata.projects || []
+            })
         }
     }
 
@@ -83,28 +82,34 @@ export class Supabase implements Auth {
             throw new CommonError("Not found any user with given id")
         }
 
-        return {
+        return new User({
             id: result.data.user.id,
-            email: result.data.user.email,
-            metadata: {
-                firstName: result.data.user.user_metadata.firstName,
-                lastName: result.data.user.user_metadata.lastName,
-                projects: result.data.user.user_metadata.projects
-            }
-        }
+            email: result.data.user.email || "",
+            firstName: result.data.user.user_metadata.firstName,
+            lastName: result.data.user.user_metadata.lastName,
+            projects: result.data.user.user_metadata.projects || []
+        })
     }
 
-    async updateUser(userId: string, metadata: Record<string, any>) {
-        const result = await this.client.auth.admin.updateUserById(userId, {
-            user_metadata: metadata
+    async updateUser(user: User) {
+        const result = await this.client.auth.admin.updateUserById(user.id, {
+            user_metadata: {
+                firstName: user.firstName,
+                lastName: user.lastName,
+                projects: user.projects
+            }
         })
 
         if (result.error) {
             throw new CommonError(result.error.message)
         }
 
-        return {
-            id: result.data.user.id
-        }
+        return new User({
+            id: result.data.user.id,
+            email: result.data.user.email || "",
+            firstName: result.data.user.user_metadata.firstName,
+            lastName: result.data.user.user_metadata.lastName,
+            projects: result.data.user.user_metadata.projects
+        })
     }
 }

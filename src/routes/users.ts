@@ -1,6 +1,5 @@
 import z from "zod";
 import { FastifyTypedInstance } from "../types";
-import { User } from "../entities/User";
 import { IUserUseCases } from "../usecases/users";
 
 export async function userRoutes(app: FastifyTypedInstance, userUseCases: IUserUseCases) {
@@ -17,7 +16,11 @@ export async function userRoutes(app: FastifyTypedInstance, userUseCases: IUserU
             }),
             response: {
                 201: z.object({
-                    id: z.string()
+                    id: z.string(),
+                    email: z.string(),
+                    firstName: z.string(),
+                    lastName: z.string(),
+                    projects: z.array(z.string()),
                 }).describe("User created"),
             }
         }

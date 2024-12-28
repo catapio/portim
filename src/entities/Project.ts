@@ -34,4 +34,12 @@ export class Project {
             users: this.users,
         };
     }
+
+    addUser(userId: string) {
+        this.users.push(userId)
+    }
+
+    removeUser(userId: string) {
+        this.users = this.users.filter((id) => id !== userId)
+    }
 }
