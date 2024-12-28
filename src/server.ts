@@ -17,6 +17,8 @@ import { Authorization } from "./middlewares/authorize"
 import fastifyFormbody from "@fastify/formbody"
 import { ProjectService } from "./services/projects"
 import { PrismaClient } from "@prisma/client"
+import { UserUseCases } from "./usecases/users"
+import { ProjectUseCases } from "./usecases/projects"
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -133,12 +135,17 @@ const auth = new Supabase(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
 const authorization = new Authorization(auth)
 const prisma = new PrismaClient()
 
+// create services
 const userService = new UserService(auth)
 const projectService = new ProjectService(prisma)
 
+// create use cases
+const userUseCases = new UserUseCases(userService)
+const projectUseCases = new ProjectUseCases(userService, projectService)
+
 authRoutes(app)
-app.register((app) => userRoutes(app, userService))
-app.register((app) => projectRoutes(app, authorization, userService, projectService))
+app.register((app) => userRoutes(app, userUseCases))
+app.register((app) => projectRoutes(app, authorization, projectUseCases))
 
 app.setErrorHandler((error, request, reply) => {
     if (!error.statusCode || error.statusCode === 500) {

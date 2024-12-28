@@ -1,12 +1,10 @@
 import z from "zod";
 import { FastifyTypedInstance } from "../types";
 import { Authorization } from "../middlewares/authorize";
-import { IUserService } from "../services/users";
-import { IProjectService } from "../services/projects";
-import { Project } from "../entities/Project";
 import { CommonError } from "../utils/commonError";
+import { ProjectUseCases } from "../usecases/projects";
 
-export async function projectRoutes(app: FastifyTypedInstance, authorization: Authorization, userService: IUserService, projectService: IProjectService) {
+export async function projectRoutes(app: FastifyTypedInstance, authorization: Authorization, projectUseCases: ProjectUseCases) {
     app.post("/projects", {
         preHandler: authorization.authorize,
         schema: {
@@ -36,38 +34,15 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
             }
         }
     }, async (request, reply) => {
-        const { name } = request.body
-        request.logger.info(`creating new project. name: ${name}`)
-        if (!request.user || !request.user?.id) {
+        request.logger.info(`creating new project. name: ${request.body.name}`)
+
+        if (!request.user) {
             throw new CommonError("No user to assign project")
         }
 
-        const project = new Project({
-            id: "",
-            name,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            ownerId: request.user.id,
-            users: [request.user.id]
-        })
+        const newProject = await projectUseCases.createProject(request.body, request.user.id, request.user.metadata)
 
-        const newProject = await projectService.create(project)
-        request.logger.info(`created new project. name: ${name}. id: ${newProject.id}`)
-
-        if (Array.isArray(request.user.metadata.projects) && request.user.metadata.projects.length) {
-            request.user.metadata.projects.push(newProject.id)
-        } else {
-            request.user.metadata.projects = [newProject.id]
-        }
-        try {
-            await userService.update(request.user.id, request.user.metadata)
-        } catch (err) {
-            // if got an error to assign the project to the user, the project must be deleted
-            await projectService.delete(newProject.id)
-            throw err
-        }
-        request.logger.info(`assign project name ${name} to user id ${request.user.id}`)
-
+        request.logger.info(`created new project. name: ${request.body.name}. id: ${newProject.id}`)
         return reply.status(201).send(newProject)
     })
 
@@ -100,8 +75,7 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
             }
         }
     }, async (request, reply) => {
-        const { projectId } = request.params
-        const project = await projectService.findById(projectId)
+        const project = await projectUseCases.getProject(request.params)
 
         return reply.status(200).send(project)
     })
@@ -126,25 +100,22 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
                     error: z.string(),
                     message: z.string()
                 }).describe("Unauthorized"),
+                403: z.object({
+                    statusCode: z.number().default(403),
+                    error: z.string(),
+                    message: z.string()
+                }).describe("Forbidden"),
             }
         }
     }, async (request, reply) => {
-        const { projectId } = request.params
-        const projectDeleted = await projectService.delete(projectId)
+        if (!request.user) throw new CommonError("no user to identify and delete the project")
 
-        try {
-            for (const userId of projectDeleted.users) {
-                const user = await userService.findById(userId)
-                await userService.update(user.id, { projects: user.projects?.filter((id) => id !== projectId) })
-            }
-        } catch (err) {
-            request.logger.error(err)
-        }
+        await projectUseCases.deleteProject({
+            projectId: request.params.projectId,
+            userId: request.user.id
+        })
 
         return reply.status(204).send()
     })
-
-    // PATCH - add user [only owner can do this]
-    // PATCH - remove user [only owner can do this]
 }
 

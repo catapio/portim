@@ -1,9 +1,9 @@
 import z from "zod";
 import { FastifyTypedInstance } from "../types";
-import { IUserService } from "../services/users";
 import { User } from "../entities/User";
+import { IUserUseCases } from "../usecases/users";
 
-export async function userRoutes(app: FastifyTypedInstance, userService: IUserService) {
+export async function userRoutes(app: FastifyTypedInstance, userUseCases: IUserUseCases) {
     app.post("/users/signup", {
         schema: {
             tags: ["Users"],
@@ -22,17 +22,8 @@ export async function userRoutes(app: FastifyTypedInstance, userService: IUserSe
             }
         }
     }, async (request, reply) => {
-        const { email, firstName, lastName, password } = request.body
-        const user = new User({
-            id: "",
-            email,
-            firstName,
-            lastName,
-            projects: []
-        })
-
         request.logger.info("creating new user")
-        const result = await userService.create(user, password)
+        const result = await userUseCases.createUser(request.body)
         request.logger.info(`created new user id: ${result.id}`)
 
         return reply.status(201).send(result)
@@ -57,10 +48,8 @@ export async function userRoutes(app: FastifyTypedInstance, userService: IUserSe
             }
         }
     }, async (request, reply) => {
-        const { email, password } = request.body
-
         request.logger.info("authenticating user")
-        const result = await userService.authenticate(email, password)
+        const result = await userUseCases.authenticateUser(request.body)
         request.logger.info("authenticated user id")
 
         return reply.status(201).send(result)
