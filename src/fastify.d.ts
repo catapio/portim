@@ -8,7 +8,11 @@ declare module "fastify" {
         user?: {
             id: string,
             email?: string,
-            metadata: Record<string, unknown>
+            metadata: {
+                firstName: string
+                lastName: string
+                projects?: string[]
+            }
         };
     }
 }

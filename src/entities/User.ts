@@ -1,27 +1,39 @@
+export interface IUser {
+    id: string
+    email: string
+    firstName: string
+    lastName: string
+    projects?: string[]
+}
+
 export class User {
     id: string
     email: string
     firstName: string
     lastName: string
-    organizationId: string
-    createdAt: Date
-    updatedAt: Date
+    projects?: string[]
 
-    constructor(
-        id: string,
-        email: string,
-        firstName: string,
-        lastName: string,
-        organizationId: string,
-        createdAt: Date,
-        updatedAt: Date
-    ) {
+    constructor({
+        id,
+        email,
+        firstName,
+        lastName,
+        projects,
+    }: IUser) {
         this.id = id
         this.email = email
         this.firstName = firstName
         this.lastName = lastName
-        this.organizationId = organizationId
-        this.createdAt = createdAt
-        this.updatedAt = updatedAt
+        this.projects = projects
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            email: this.email,
+            firstName: this.firstName,
+            lastName: this.lastName,
+            projects: this.projects,
+        }
     }
 }

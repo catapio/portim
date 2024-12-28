@@ -67,8 +67,44 @@ export class Supabase implements Auth {
             user: {
                 id: result.data.user.id,
                 email: result.data.user.email,
-                metadata: result.data.user.user_metadata
+                metadata: {
+                    firstName: result.data.user.user_metadata.firstName,
+                    lastName: result.data.user.user_metadata.lastName,
+                    projects: result.data.user.user_metadata.projects,
+                }
             }
+        }
+    }
+
+    async findUser(userId: string) {
+        const result = await this.client.auth.admin.getUserById(userId)
+
+        if (result.error) {
+            throw new CommonError("Not found any user with given id")
+        }
+
+        return {
+            id: result.data.user.id,
+            email: result.data.user.email,
+            metadata: {
+                firstName: result.data.user.user_metadata.firstName,
+                lastName: result.data.user.user_metadata.lastName,
+                projects: result.data.user.user_metadata.projects
+            }
+        }
+    }
+
+    async updateUser(userId: string, metadata: Record<string, any>) {
+        const result = await this.client.auth.admin.updateUserById(userId, {
+            user_metadata: metadata
+        })
+
+        if (result.error) {
+            throw new CommonError(result.error.message)
+        }
+
+        return {
+            id: result.data.user.id
         }
     }
 }

@@ -9,11 +9,12 @@ datasource db {
 }
 
 model Project {
-  id          String   @id @default(dbgenerated("generate_hex_object_id()")) @db.VarChar(24)
-  name        String   @db.VarChar(20) // Limite de 20 caracteres
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
-  ownerId     String   @map("owner_id") @db.VarChar(36)
+    id        String   @id @default(dbgenerated("generate_hex_object_id()")) @db.VarChar(24)
+    name      String   @db.VarChar(20) // Limite de 20 caracteres
+    createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+    updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+    ownerId   String   @map("owner_id") @db.VarChar(36)
+    users     String[] @db.VarChar(36)
 
-  @@map("projects")
+    @@map("projects")
 }

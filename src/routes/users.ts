@@ -23,15 +23,13 @@ export async function userRoutes(app: FastifyTypedInstance, userService: IUserSe
         }
     }, async (request, reply) => {
         const { email, firstName, lastName, password } = request.body
-        const user = new User(
-            "",
+        const user = new User({
+            id: "",
             email,
             firstName,
             lastName,
-            "",
-            new Date(),
-            new Date(),
-        )
+            projects: []
+        })
 
         request.logger.info("creating new user")
         const result = await userService.create(user, password)

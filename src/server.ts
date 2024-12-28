@@ -15,6 +15,8 @@ import z from "zod"
 import { projectRoutes } from "./routes/projects"
 import { Authorization } from "./middlewares/authorize"
 import fastifyFormbody from "@fastify/formbody"
+import { ProjectService } from "./services/projects"
+import { PrismaClient } from "@prisma/client"
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -66,6 +68,7 @@ app.addHook("onRequest", async (request) => {
 app.addHook("onResponse", async (request, reply) => {
     logger.info("http-response", {
         requestId: request.id,
+        userId: request.user?.id,
         method: request.method,
         url: request.url,
         status: reply.statusCode,
@@ -128,12 +131,14 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
 }
 const auth = new Supabase(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
 const authorization = new Authorization(auth)
+const prisma = new PrismaClient()
 
 const userService = new UserService(auth)
+const projectService = new ProjectService(prisma)
 
 authRoutes(app)
 app.register((app) => userRoutes(app, userService))
-app.register((app) => projectRoutes(app, authorization))
+app.register((app) => projectRoutes(app, authorization, userService, projectService))
 
 app.setErrorHandler((error, request, reply) => {
     if (!error.statusCode || error.statusCode === 500) {
