@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import { Project } from "../entities/Project";
 import { logger } from "../utils/logger";
 import { CommonError } from "../utils/commonError";
+import { PrismaClient } from "@prisma/client";
 
 export interface ProjectExecuted {
     id: string

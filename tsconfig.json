@@ -2,6 +2,9 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "display": "Node 22",
     "_version": "22.0.0",
+    "include": [
+        "src/**/*.ts"
+    ],
     "compilerOptions": {
         "lib": [
             "es2023"
@@ -11,6 +14,7 @@
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "moduleResolution": "node16"
+        "moduleResolution": "node16",
+        "outDir": "dist"
     }
 }

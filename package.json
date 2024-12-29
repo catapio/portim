@@ -1,13 +1,13 @@
 {
     "name": "portim",
     "version": "1.0.0",
-    "description": "",
+    "description": "portim is the portal for catap.io configurations",
     "main": "index.js",
     "scripts": {
-        "dev": "tsx watch --env-file .env src/server.ts"
+        "dev": "tsx watch --env-file .env src/server.ts",
+        "build": "tsc"
     },
-    "keywords": [],
-    "author": "",
+    "author": "Rodrigo Dalla Dea",
     "license": "ISC",
     "dependencies": {
         "@fastify/cors": "^10.0.1",
@@ -20,11 +20,12 @@
         "fastify-type-provider-zod": "^4.0.2",
         "winston": "^3.17.0",
         "winston-daily-rotate-file": "^5.0.0",
+        "prisma": "^6.1.0",
         "zod": "^3.24.1"
     },
     "devDependencies": {
+        "@flydotio/dockerfile": "^0.5.9",
         "@types/node": "^22.10.2",
-        "prisma": "^6.1.0",
         "tsx": "^4.19.2",
         "typescript": "^5.7.2"
     },

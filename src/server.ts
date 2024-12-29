@@ -167,7 +167,7 @@ app.setErrorHandler((error, request, reply) => {
 
 // start
 if (!process.env.PORT) logger.warn("PORT not defined. setting 3000")
-app.listen({ port: Number(process.env.PORT) || 3000 }).then(() => {
+app.listen({ port: Number(process.env.PORT) || 3000, host: process.env.FASTIFY_ADDRESS }).then(() => {
     logger.info(`application started on port: ${process.env.PORT}`)
 })
 
