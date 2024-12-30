@@ -68,7 +68,8 @@ app.addHook("onRequest", async (request) => {
 
 // middleware to log response track
 app.addHook("onResponse", async (request, reply) => {
-    logger.info("http-response", {
+    logger.info(`${request.method} ${request.url} ${reply.getHeader("content-length") || "-"} ${reply.statusCode} ${reply.elapsedTime.toFixed(3)}ms`, {
+        type: "http",
         requestId: request.id,
         userId: request.user?.id,
         method: request.method,

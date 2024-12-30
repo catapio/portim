@@ -1,14 +1,32 @@
 import winston from "winston"
-import DailyRotateFile from "winston-daily-rotate-file";
+import LokiTransport from "winston-loki";
 
-const fileRotateTransport: DailyRotateFile = new DailyRotateFile({
-    filename: "logs/%DATE%.log",
-    datePattern: "YYYY-MM-DD",
-    zippedArchive: true,
-    maxSize: "20m",
-    maxFiles: "30d",
-    createSymlink: true,
-});
+const lokiTransport = new LokiTransport({
+    host: process.env.LOKI_HOST || "",
+    labels: { app: "portim", env: process.env.NODE_ENV || "not-defined" },
+    json: true,
+    basicAuth: `${process.env.LOKI_USER_ID}:${process.env.LOKI_TOKEN}`,
+    format: winston.format.json(),
+    replaceTimestamp: true,
+    batching: true,
+    interval: 5,
+    onConnectionError: (err) => console.error(err),
+})
+
+const transports: winston.transport[] = [
+    new winston.transports.Console({
+        format: winston.format.combine(
+            winston.format.colorize(),
+            winston.format.printf(({ timestamp, level, message, stack }) => {
+                return stack
+                    ? `[${timestamp}] ${level}: ${message}\nStack: ${stack}`
+                    : `[${timestamp}] ${level}: ${message}`;
+            }),
+        ),
+    }),
+]
+
+if (process.env.NODE_ENV && process.env.NODE_ENV !== "local") transports.push(lokiTransport)
 
 const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || "info",
@@ -17,16 +35,7 @@ const logger = winston.createLogger({
         winston.format.timestamp(),
         winston.format.json(),
     ),
-    transports: [
-        new winston.transports.Console(),
-        fileRotateTransport,
-    ],
-    exceptionHandlers: [
-        new winston.transports.File({ filename: "logs/exception.log" }),
-    ],
-    rejectionHandlers: [
-        new winston.transports.File({ filename: "logs/rejections.log" }),
-    ],
+    transports,
 });
 
 export { logger }

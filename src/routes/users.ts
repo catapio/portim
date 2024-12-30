@@ -53,7 +53,7 @@ export async function userRoutes(app: FastifyTypedInstance, userUseCases: IUserU
     }, async (request, reply) => {
         request.logger.info("authenticating user")
         const result = await userUseCases.authenticateUser(request.body)
-        request.logger.info("authenticated user id")
+        request.logger.info("authenticated")
 
         return reply.status(201).send(result)
     })
