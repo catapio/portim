@@ -14,9 +14,9 @@ model Project {
     ownerId    String      @map("owner_id") @db.VarChar(36)
     users      String[]    @db.VarChar(36)
     interfaces Interface[]
+    clients    Client[]
     createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz
     updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz
-    clients    Client[]
 
     @@map("projects")
 }
