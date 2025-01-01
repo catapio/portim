@@ -68,7 +68,14 @@ export class ProjectService implements IProjectService {
                 where: {
                     id: project.id
                 },
-                data: project
+                data: {
+                    id: project.id,
+                    name: project.name,
+                    users: project.users,
+                    ownerId: project.ownerId,
+                    createdAt: project.createdAt,
+                    updatedAt: project.updatedAt
+                }
             })
             logger.debug(`updated project in database. id: ${projectUpdated.id}`)
 
