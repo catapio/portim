@@ -5,7 +5,7 @@ export interface ISession {
     source: string
     target: string
     clientId: string
-    messages: IMessage[]
+    messages?: IMessage[]
     createdAt: Date
     updatedAt: Date
 }
@@ -15,7 +15,7 @@ export class Session implements ISession {
     source: string
     target: string
     clientId: string
-    messages: IMessage[]
+    messages?: IMessage[]
     createdAt: Date
     updatedAt: Date
 

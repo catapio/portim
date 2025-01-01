@@ -5,7 +5,7 @@ export interface IClient {
     projectId: string
     externalId: string
     metadata: Record<string, unknown>
-    sessions: ISession[]
+    sessions?: ISession[]
     createdAt: Date
     updatedAt: Date
 }
@@ -15,7 +15,7 @@ export class Client implements IClient {
     projectId: string
     externalId: string
     metadata: Record<string, unknown>
-    sessions: ISession[]
+    sessions?: ISession[]
     createdAt: Date
     updatedAt: Date
 

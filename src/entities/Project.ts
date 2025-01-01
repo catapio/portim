@@ -4,23 +4,23 @@ import { IInterface } from "./Interface"
 export interface IProject {
     id: string
     name: string
-    createdAt: Date
-    updatedAt: Date
     ownerId: string
     users: string[]
-    interfaces: IInterface[]
-    clients: IClient[]
+    interfaces?: IInterface[]
+    clients?: IClient[]
+    createdAt: Date
+    updatedAt: Date
 }
 
 export class Project implements IProject {
     id: string
     name: string
-    createdAt: Date
-    updatedAt: Date
     ownerId: string
     users: string[]
-    interfaces: IInterface[]
-    clients: IClient[]
+    interfaces?: IInterface[]
+    clients?: IClient[]
+    createdAt: Date
+    updatedAt: Date
 
     constructor({ id, name, createdAt, updatedAt, ownerId, users, interfaces, clients }: IProject) {
         this.id = id

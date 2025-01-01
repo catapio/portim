@@ -8,7 +8,7 @@ export interface IInterface {
     control: string
     externalIdField: string
     projectId: string
-    sessions: ISession[]
+    sessions?: ISession[]
     createdAt: Date
     updatedAt: Date
 }
@@ -21,7 +21,7 @@ export class Interface implements IInterface {
     control: string
     externalIdField: string
     projectId: string
-    sessions: ISession[]
+    sessions?: ISession[]
     createdAt: Date
     updatedAt: Date
 
