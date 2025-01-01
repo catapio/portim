@@ -16,6 +16,7 @@ model Project {
     interfaces Interface[]
     createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz
     updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+    clients    Client[]
 
     @@map("projects")
 }
@@ -37,27 +38,30 @@ model Interface {
     @@map("interfaces")
 }
 
-model User {
+model Client {
     id         String    @id @default(dbgenerated("generate_hex_object_id()")) @db.VarChar(24)
+    projectId  String    @map("project_id") @db.VarChar(24)
     externalId String    @map("external_id") @db.VarChar(50)
     metadata   Json      @db.JsonB
     sessions   Session[]
     createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
     updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-    @@map("users")
+    project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+    @@map("clients")
 }
 
 model Session {
     id        String    @id @default(dbgenerated("generate_hex_object_id()")) @db.VarChar(24)
-    source    String    @db.VarChar(24) // interface id where user message is comming
-    target    String    @db.VarChar(24) // interface id where user message goes
-    userId    String    @map("user_id") @db.VarChar(24)
+    source    String    @db.VarChar(24) // interface id where client message is comming
+    target    String    @db.VarChar(24) // interface id where client message goes
+    clientId  String    @map("client_id") @db.VarChar(24)
     messages  Message[]
     createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
     updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    client    Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
     interface Interface @relation(fields: [source], references: [id], onDelete: Cascade)
 
     @@map("sessions")
