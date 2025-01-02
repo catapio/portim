@@ -1,4 +1,5 @@
 import { Client } from "../entities/Client";
+import { Interface } from "../entities/Interface";
 import { Message } from "../entities/Message";
 import { Session } from "../entities/Session";
 import { ClientService } from "../services/clients";
@@ -51,8 +52,9 @@ export class MessageUseCases implements IMessageUseCases {
 
     async createMessage({ sender, body, status }: CreateMessageDTO, projectId: string, interfaceId: string, sessionId?: string) {
         let session: Session | null = null
+        let interfaceInst: Interface | null = null
         if (!sessionId) {
-            const interfaceInst = await this.interfaceService.findById(interfaceId)
+            interfaceInst = await this.interfaceService.findById(interfaceId)
             const externalId = getValueFromPath(body, interfaceInst.externalIdField)
 
             if (!interfaceInst.control) throw new CommonError("Interface must have a default control interface")
@@ -89,6 +91,10 @@ export class MessageUseCases implements IMessageUseCases {
 
                 session = await this.sessionService.create(newSession)
             }
+        } else {
+            // it is an answer from the control interface
+            session = await this.sessionService.findById(sessionId)
+            if (session.target !== sender) throw new CommonError("Message does not come from control interface. Pass control before sending the message")
         }
 
         if (!session) throw new CommonError("Not possible to assign message to a session")
@@ -105,6 +111,9 @@ export class MessageUseCases implements IMessageUseCases {
 
         const newMessage = await this.messageService.create(message)
         logger.debug(`created new message in database. source: ${interfaceId}. sessionId: ${session.id}. id: ${newMessage.id}`)
+
+        // if (!interfaceInst) interfaceInst = await this.interfaceService.findById(interfaceId)
+        // here will call the event endpoint 
 
         return newMessage
     }

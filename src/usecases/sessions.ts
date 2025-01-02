@@ -17,6 +17,7 @@ export interface GetSessionDTO {
 export interface UpdateSessionDTO {
     sessionId: string
     target: string
+    metadata?: Record<string, unknown>
 }
 
 export interface DeleteSessionDTO {
@@ -73,6 +74,9 @@ export class SessionUseCases implements ISessionUseCases {
         session.target = target
 
         const sessionUpdated = await this.sessionService.update(session)
+
+        // const interfaceInst = await this.interfaceService.findById(sessionUpdated.target)
+        // call control event if exists with metadata object
 
         logger.debug(`updated session id ${sessionUpdated.id}`)
         return sessionUpdated
