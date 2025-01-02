@@ -1,7 +1,7 @@
 import { logger } from "../utils/logger";
 import { CommonError } from "../utils/commonError";
 import { PrismaClient } from "@prisma/client";
-import { Session } from "../entities/Sessions";
+import { Session } from "../entities/Session";
 
 export interface ISessionService {
     findById: (sessionId: string) => Promise<Session>

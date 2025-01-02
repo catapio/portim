@@ -6,6 +6,7 @@ import { InputJsonValue } from "@prisma/client/runtime/library";
 
 export interface IClientService {
     findById: (clientId: string) => Promise<Client>
+    findByExternalId: (externalId: string) => Promise<Client>
     create: (client: Client) => Promise<Client>
     update: (client: Client) => Promise<Client>
     delete: (clientId: string) => Promise<Client>
@@ -32,6 +33,27 @@ export class ClientService implements IClientService {
         if (!client) throw new CommonError("Client does not exists")
 
         logger.debug(`found client in database. id: ${client.id}`)
+
+        return new Client({
+            ...client,
+            metadata: JSON.parse(client.metadata?.toString() || "{}")
+        })
+    }
+
+    /**
+    * Find a client by externalId and it may throw an error if fetch fails.
+    * @throws {Error} If the search fails.
+    */
+    async findByExternalId(externalId: string) {
+        logger.debug(`finding client in database. externalId: ${externalId}`)
+        const client = await this.prisma.client.findFirst({
+            where: {
+                externalId: externalId
+            }
+        })
+        if (!client) throw new CommonError("Client does not exists")
+
+        logger.debug(`found client by external id in database. id: ${client.id}`)
 
         return new Client({
             ...client,
