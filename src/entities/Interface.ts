@@ -5,7 +5,7 @@ export interface IInterface {
     name: string
     eventEndpoint: string
     controlEndpoint: string
-    control: string
+    control: string | null
     externalIdField: string
     projectId: string
     sessions?: ISession[]
@@ -18,7 +18,7 @@ export class Interface implements IInterface {
     name: string
     eventEndpoint: string
     controlEndpoint: string
-    control: string
+    control: string | null
     externalIdField: string
     projectId: string
     sessions?: ISession[]

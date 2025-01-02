@@ -23,7 +23,7 @@ export class ProjectService implements IProjectService {
 
     /**
     * Find a project by id and it may throw an error if fetch fails.
-    * @throws {Error} If the creation fails.
+    * @throws {Error} If the search fails.
     */
     async findById(projectId: string) {
         logger.debug(`finding project in database. id: ${projectId}`)
