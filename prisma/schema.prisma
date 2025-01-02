@@ -70,6 +70,7 @@ model Session {
 model Message {
     id        String   @id @default(dbgenerated("generate_hex_object_id()")) @db.VarChar(24)
     sessionId String   @map("session_id") @db.VarChar(24)
+    sender    String   @db.Text
     content   String   @db.Text // hash of the body request
     status    String   @db.VarChar(20)
     createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz

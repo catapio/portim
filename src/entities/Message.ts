@@ -1,6 +1,7 @@
 export interface IMessage {
     id: string
     sessionId: string
+    sender: string
     content: string
     status: string
     createdAt: Date
@@ -10,6 +11,7 @@ export interface IMessage {
 export class Message implements IMessage {
     id: string
     sessionId: string
+    sender: string
     content: string
     status: string
     createdAt: Date
@@ -18,6 +20,7 @@ export class Message implements IMessage {
     constructor({
         id,
         sessionId,
+        sender,
         content,
         status,
         createdAt,
@@ -25,6 +28,7 @@ export class Message implements IMessage {
     }: IMessage) {
         this.id = id
         this.sessionId = sessionId
+        this.sender = sender
         this.content = content
         this.status = status
         this.createdAt = createdAt
@@ -35,6 +39,7 @@ export class Message implements IMessage {
         return {
             id: this.id,
             sessionId: this.sessionId,
+            sender: this.sender,
             content: this.content,
             status: this.status,
             createdAt: this.createdAt.toISOString(),
