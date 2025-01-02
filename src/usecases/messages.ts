@@ -49,7 +49,7 @@ export class MessageUseCases implements IMessageUseCases {
         this.interfaceService = interfaceService
     }
 
-    async createMessage({ sender, body, status }: CreateMessageDTO, projectId: string, interfaceId: string, sessionId: string) {
+    async createMessage({ sender, body, status }: CreateMessageDTO, projectId: string, interfaceId: string, sessionId?: string) {
         let session: Session | null = null
         if (!sessionId) {
             const interfaceInst = await this.interfaceService.findById(interfaceId)
@@ -75,16 +75,20 @@ export class MessageUseCases implements IMessageUseCases {
                 client = await this.clientService.create(newClient)
             }
 
-            const newSession = new Session({
-                id: "",
-                source: interfaceId,
-                target: interfaceInst.control,
-                clientId: client.id,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            })
+            try {
+                session = await this.sessionService.findBySource(interfaceId, client.id)
+            } catch (err) {
+                const newSession = new Session({
+                    id: "",
+                    source: interfaceId,
+                    target: interfaceInst.control,
+                    clientId: client.id,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                })
 
-            session = await this.sessionService.create(newSession)
+                session = await this.sessionService.create(newSession)
+            }
         }
 
         if (!session) throw new CommonError("Not possible to assign message to a session")

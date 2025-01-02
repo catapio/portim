@@ -5,6 +5,7 @@ import { Session } from "../entities/Session";
 
 export interface ISessionService {
     findById: (sessionId: string) => Promise<Session>
+    findBySource: (source: string, clientId: string) => Promise<Session>
     create: (session: Session) => Promise<Session>
     update: (session: Session) => Promise<Session>
     delete: (sessionId: string) => Promise<Session>
@@ -31,6 +32,25 @@ export class SessionService implements ISessionService {
         if (!session) throw new CommonError("Session does not exists")
 
         logger.debug(`found session in database. id: ${session.id}`)
+
+        return new Session(session)
+    }
+
+    /**
+    * Find a session by source and it may throw an error if fetch fails.
+    * @throws {Error} If the search fails.
+    */
+    async findBySource(source: string, clientId: string) {
+        logger.debug(`finding session in database by source. source: ${source}`)
+        const session = await this.prisma.session.findFirst({
+            where: {
+                source,
+                clientId,
+            }
+        })
+        if (!session) throw new CommonError("Session does not exists")
+
+        logger.debug(`found session in database by interfaceId. id: ${session.id}`)
 
         return new Session(session)
     }
