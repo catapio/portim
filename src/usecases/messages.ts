@@ -52,12 +52,11 @@ export class MessageUseCases implements IMessageUseCases {
 
     async createMessage({ sender, body, status }: CreateMessageDTO, projectId: string, interfaceId: string, sessionId?: string) {
         let session: Session | null = null
-        let interfaceInst: Interface | null = null
         if (!sessionId) {
-            interfaceInst = await this.interfaceService.findById(interfaceId)
+            const interfaceInst = await this.interfaceService.findById(interfaceId)
             const externalId = getValueFromPath(body, interfaceInst.externalIdField)
 
-            if (!interfaceInst.control) throw new CommonError("Interface must have a default control interface")
+            if (!interfaceInst.control) throw new CommonError("If no sessionId passed the interface must have a default control interface")
             if (!externalId) throw new CommonError("No external id found")
 
             let client: Client
@@ -92,9 +91,7 @@ export class MessageUseCases implements IMessageUseCases {
                 session = await this.sessionService.create(newSession)
             }
         } else {
-            // it is an answer from the control interface
             session = await this.sessionService.findById(sessionId)
-            if (session.target !== sender) throw new CommonError("Message does not come from control interface. Pass control before sending the message")
         }
 
         if (!session) throw new CommonError("Not possible to assign message to a session")
@@ -112,8 +109,13 @@ export class MessageUseCases implements IMessageUseCases {
         const newMessage = await this.messageService.create(message)
         logger.debug(`created new message in database. source: ${interfaceId}. sessionId: ${session.id}. id: ${newMessage.id}`)
 
-        // if (!interfaceInst) interfaceInst = await this.interfaceService.findById(interfaceId)
-        // here will call the event endpoint 
+        if (session.source === sender) {
+            const interfaceTarget = await this.interfaceService.findById(session.target)
+            logger.info(`call target endpoint ${interfaceTarget.eventEndpoint}`)
+        } else {
+            const interfaceSource = await this.interfaceService.findById(session.source)
+            logger.info(`call source endpoint ${interfaceSource.eventEndpoint}`)
+        }
 
         return newMessage
     }

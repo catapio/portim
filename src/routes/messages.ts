@@ -17,7 +17,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: "Create message for systems that could not create session previously. Portim will create new session if is the first message or it will retrieve the session created in database. The identification of session comes from externalId configured in interface",
+            description: `Create message for systems that could not create session previously, the systems that is responsible to start the conversation. \n\nPortim will create new session if is the first message or it will retrieve the session created in database. \n\nThe identification of session comes from externalId configured in interface and the message will be sent to the control interface event endpoint.`,
             params: z.object({
                 projectId: z.string(),
                 interfaceId: z.string(),
