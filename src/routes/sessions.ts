@@ -111,11 +111,6 @@ export async function sessionRoutes(app: FastifyTypedInstance, authorization: Au
                     error: z.string(),
                     message: z.string()
                 }).describe("Unauthorized"),
-                403: z.object({
-                    statusCode: z.number().default(403),
-                    error: z.string(),
-                    message: z.string()
-                }).describe("Forbidden"),
             }
         }
     }, async (request, reply) => {
@@ -144,11 +139,6 @@ export async function sessionRoutes(app: FastifyTypedInstance, authorization: Au
                     error: z.string(),
                     message: z.string()
                 }).describe("Unauthorized"),
-                403: z.object({
-                    statusCode: z.number().default(403),
-                    error: z.string(),
-                    message: z.string()
-                }).describe("Forbidden"),
             }
         }
     }, async (request, reply) => {
