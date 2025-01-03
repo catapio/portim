@@ -11,10 +11,10 @@ export function getValueFromPath(obj: any, path: string): string {
         .split(/\./)
         .filter((key) => key !== "")
 
-    return String(
-        keys.reduce((acc, key) => {
-            if (acc === undefined || acc === null) return undefined
-            return acc[key]
-        }, obj)
-    )
+
+    return keys.reduce((acc, key) => {
+        if (acc === undefined || acc === null) return undefined
+        return acc[key]
+    }, obj)
+
 }

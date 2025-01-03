@@ -1,5 +1,4 @@
 import { Client } from "../entities/Client";
-import { Interface } from "../entities/Interface";
 import { Message } from "../entities/Message";
 import { Session } from "../entities/Session";
 import { ClientService } from "../services/clients";
@@ -57,7 +56,7 @@ export class MessageUseCases implements IMessageUseCases {
             const externalId = getValueFromPath(body, interfaceInst.externalIdField)
 
             if (!interfaceInst.control) throw new CommonError("If no sessionId passed the interface must have a default control interface")
-            if (!externalId) throw new CommonError("No external id found")
+            if (!externalId) throw new CommonError("No external id found") // in future will be make a bypass
 
             let client: Client
             try {
@@ -66,7 +65,7 @@ export class MessageUseCases implements IMessageUseCases {
                 logger.debug(`no client found, creating new one. error: ${err.message}`)
                 const newClient = new Client({
                     id: "",
-                    externalId,
+                    externalId: String(externalId),
                     metadata: {},
                     projectId,
                     createdAt: new Date(),

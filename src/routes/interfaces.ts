@@ -30,7 +30,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                 controlEndpoint: z.string().url().refine(
                     (url) => url.startsWith("https"),
                     { message: "The URL must starts with 'https'" }
-                ),
+                ).optional(),
                 externalIdField: z.string(),
                 control: z.string().optional(),
             }),
@@ -106,11 +106,11 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                 interfaceId: z.string(),
             }),
             body: z.object({
-                name: z.string(),
-                eventEndpoint: z.string(),
-                controlEndpoint: z.string(),
+                name: z.string().optional(),
+                eventEndpoint: z.string().optional(),
+                controlEndpoint: z.string().optional(),
                 control: z.string().optional(),
-                externalIdField: z.string(),
+                externalIdField: z.string().optional(),
             }),
             response: {
                 200: z.object({

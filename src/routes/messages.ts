@@ -22,7 +22,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
                 projectId: z.string(),
                 interfaceId: z.string(),
             }),
-            body: z.object({}),
+            body: z.record(z.unknown()),
             response: {
                 201: z.object({
                     id: z.string(),
@@ -67,7 +67,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
                 interfaceId: z.string(),
                 sessionId: z.string(),
             }),
-            body: z.object({}),
+            body: z.record(z.unknown()),
             response: {
                 201: z.object({
                     id: z.string(),

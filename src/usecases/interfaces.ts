@@ -7,7 +7,7 @@ import { logger } from "../utils/logger";
 export interface CreateInterfaceDTO {
     name: string
     eventEndpoint: string
-    controlEndpoint: string
+    controlEndpoint?: string
     control?: string
     externalIdField: string
 }
@@ -18,11 +18,11 @@ export interface GetInterfaceDTO {
 
 export interface UpdateInterfaceDTO {
     interfaceId: string
-    name: string
-    eventEndpoint: string
-    controlEndpoint: string
+    name?: string
+    eventEndpoint?: string
+    controlEndpoint?: string
     control?: string
-    externalIdField: string
+    externalIdField?: string
 }
 
 export interface DeleteInterfaceDTO {
@@ -48,7 +48,7 @@ export class InterfaceUseCases implements IInterfaceUseCases {
             id: "",
             name,
             eventEndpoint,
-            controlEndpoint,
+            controlEndpoint: controlEndpoint || "",
             control: control || null,
             externalIdField,
             projectId,
@@ -57,7 +57,7 @@ export class InterfaceUseCases implements IInterfaceUseCases {
         })
 
         const newInterface = await this.interfaceService.create(interfaceInst)
-        logger.debug(`created new interface in database. name: ${name}. id: ${newInterface.id} in project id: ${projectId}`)
+        logger.debug(`created new interface in database. name: ${name}.id: ${newInterface.id} in project id: ${projectId} `)
 
         return newInterface
     }
@@ -69,14 +69,14 @@ export class InterfaceUseCases implements IInterfaceUseCases {
     }
 
     async updateInterface({ interfaceId, name, eventEndpoint, controlEndpoint, externalIdField, control }: UpdateInterfaceDTO) {
-        logger.debug(`update interface id ${interfaceId}`)
+        logger.debug(`update interface id ${interfaceId} `)
         const interfaceInst = await this.interfaceService.findById(interfaceId)
         if (control) {
             try {
                 await this.interfaceService.findById(control)
             } catch (err: any) {
-                logger.debug(`error searching for control interface ${err.message}`)
-                throw new CommonError(`Not found control interface with id: ${control}`)
+                logger.debug(`error searching for control interface ${err.message} `)
+                throw new CommonError(`Not found control interface with id: ${control} `)
             }
         }
 
@@ -84,20 +84,20 @@ export class InterfaceUseCases implements IInterfaceUseCases {
         interfaceInst.eventEndpoint = eventEndpoint || interfaceInst.eventEndpoint
         interfaceInst.controlEndpoint = controlEndpoint || interfaceInst.controlEndpoint
         interfaceInst.externalIdField = externalIdField || interfaceInst.externalIdField
-        interfaceInst.control = control || null
+        interfaceInst.control = control || interfaceInst.control
 
         if (!isValidPath(interfaceInst.externalIdField)) throw new CommonError("ExternalId path is invalid")
 
         const interfaceUpdated = await this.interfaceService.update(interfaceInst)
 
-        logger.debug(`updated interface id ${interfaceId}`)
+        logger.debug(`updated interface id ${interfaceId} `)
         return interfaceUpdated
     }
 
     async deleteInterface({ interfaceId }: DeleteInterfaceDTO) {
-        logger.debug(`deleting interface. id: ${interfaceId}`)
+        logger.debug(`deleting interface.id: ${interfaceId} `)
         await this.interfaceService.delete(interfaceId)
 
-        logger.debug(`success deleted interface. id: ${interfaceId}`)
+        logger.debug(`success deleted interface.id: ${interfaceId} `)
     }
 }

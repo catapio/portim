@@ -23,14 +23,14 @@ export async function clientRoutes(app: FastifyTypedInstance, authorization: Aut
             }),
             body: z.object({
                 externalId: z.string(),
-                metadata: z.object({}).optional()
+                metadata: z.record(z.unknown()).optional()
             }),
             response: {
                 201: z.object({
                     id: z.string(),
                     projectId: z.string(),
                     externalId: z.string(),
-                    metadata: z.object({}),
+                    metadata: z.record(z.unknown()),
                     createdAt: z.date(),
                     updatedAt: z.date()
                 }).describe("Created client"),
@@ -64,7 +64,7 @@ export async function clientRoutes(app: FastifyTypedInstance, authorization: Aut
                     id: z.string(),
                     projectId: z.string(),
                     externalId: z.string(),
-                    metadata: z.object({}),
+                    metadata: z.record(z.unknown()),
                     createdAt: z.date(),
                     updatedAt: z.date()
                 }).describe("Fetched client"),
@@ -91,14 +91,14 @@ export async function clientRoutes(app: FastifyTypedInstance, authorization: Aut
                 clientId: z.string(),
             }),
             body: z.object({
-                metadata: z.object({}),
+                metadata: z.record(z.unknown()),
             }),
             response: {
                 200: z.object({
                     id: z.string(),
                     projectId: z.string(),
                     externalId: z.string(),
-                    metadata: z.object({}),
+                    metadata: z.record(z.unknown()),
                     createdAt: z.date(),
                     updatedAt: z.date()
                 }).describe("Updated client"),

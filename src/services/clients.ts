@@ -36,7 +36,7 @@ export class ClientService implements IClientService {
 
         return new Client({
             ...client,
-            metadata: JSON.parse(client.metadata?.toString() || "{}")
+            metadata: client.metadata as Record<string, unknown> || {}
         })
     }
 
@@ -57,7 +57,7 @@ export class ClientService implements IClientService {
 
         return new Client({
             ...client,
-            metadata: JSON.parse(client.metadata?.toString() || "{}")
+            metadata: client.metadata as Record<string, unknown> || {}
         })
     }
 
@@ -78,7 +78,7 @@ export class ClientService implements IClientService {
 
         return new Client({
             ...newClient,
-            metadata: JSON.parse(newClient.metadata?.toString() || "{}")
+            metadata: newClient.metadata as Record<string, unknown> || {}
         })
     }
 
@@ -103,7 +103,7 @@ export class ClientService implements IClientService {
 
             return new Client({
                 ...clientUpdated,
-                metadata: JSON.parse(clientUpdated.metadata?.toString() || "{}")
+                metadata: clientUpdated.metadata as Record<string, unknown> || {}
             })
         } catch (err) {
             logger.error(err)
@@ -128,7 +128,7 @@ export class ClientService implements IClientService {
 
             return new Client({
                 ...clientDeleted,
-                metadata: JSON.parse(clientDeleted.metadata?.toString() || "{}")
+                metadata: clientDeleted.metadata as Record<string, unknown> || {}
             })
         } catch (err) {
             logger.error(err)

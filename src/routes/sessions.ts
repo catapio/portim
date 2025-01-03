@@ -95,7 +95,7 @@ export async function sessionRoutes(app: FastifyTypedInstance, authorization: Au
             }),
             body: z.object({
                 target: z.string().length(24),
-                metadata: z.object({}).optional()
+                metadata: z.record(z.unknown()).optional()
             }),
             response: {
                 200: z.object({
