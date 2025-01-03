@@ -18,7 +18,7 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: "Create project",
+            description: "Create project.\n\nThe projects is where you can create interfaces and control the sessions of your clients with your system. You can add users of your company to control the project creating interfaces and controling sessions",
             body: z.object({
                 name: z.string()
             }),

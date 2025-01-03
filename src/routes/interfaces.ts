@@ -17,7 +17,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: "Create interface",
+            description: "Create interface.\n\nInterfaces are the entrypoint for messages send by users and applications, are the way that a conversation session flows",
             params: z.object({
                 projectId: z.string()
             }),
@@ -100,7 +100,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: "Update an interface",
+            description: "Update an interface.\n\nYou can modify the name, eventEndpoint, controlEndpoint, the control interface of the interface and modify the externalId field to identify a client",
             params: z.object({
                 projectId: z.string(),
                 interfaceId: z.string(),

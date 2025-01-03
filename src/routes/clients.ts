@@ -17,7 +17,7 @@ export async function clientRoutes(app: FastifyTypedInstance, authorization: Aut
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: "Create client",
+            description: "Create client.\n\nClients are de users that will comunicate with your application through an interface.\n\nEx: an user send a message to your number on WhatsApp come to an interface and send to the event endpoint of the control interface",
             params: z.object({
                 projectId: z.string()
             }),
@@ -142,4 +142,3 @@ export async function clientRoutes(app: FastifyTypedInstance, authorization: Aut
         return reply.status(204).send()
     })
 }
-

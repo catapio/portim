@@ -105,6 +105,7 @@ app.register(fastifySwagger, {
         info: {
             title: "Portim API",
             version: "1.0.0",
+            description: "`Portim API` enables you to create and manage projects, interfaces, and sessions, offering full control over inbound and outbound messaging flows. With Portim, you can seamlessly receive messages from your WhatsApp provider, process them with a bot, and dynamically route them to a human agent when needed—all without altering the original request’s body content. This flexibility ensures smooth transitions and consistent communication across different providers and workflows."
         },
         components: {
             securitySchemes: {

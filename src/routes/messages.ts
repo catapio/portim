@@ -17,7 +17,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: `Create message for systems that could not create session previously, the systems that is responsible to start the conversation. \n\nPortim will create new session if is the first message or it will retrieve the session created in database. \n\nThe identification of session comes from externalId configured in interface and the message will be sent to the control interface event endpoint.`,
+            description: "Create message for systems that could not create session previously, the systems that is responsible to start the conversation.\n\nPortim will create new session if is the first message or it will retrieve the session created in database.\n\nThe identification of session comes from externalId configured in interface and the message will be sent to the control interface event endpoint. The sessionId will be added in header `catapio-session-id`",
             params: z.object({
                 projectId: z.string(),
                 interfaceId: z.string(),
@@ -61,7 +61,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: "Create message for already created sessions and has the sessionId",
+            description: "Create message for already created sessions and has the sessionId.\n\n The interfaces that has no control interface must use this endpoint to send a new message.\n\nThe sessionId comes in header `catapio-session-id` of the incoming message",
             params: z.object({
                 projectId: z.string(),
                 interfaceId: z.string(),
@@ -141,7 +141,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: "Update message status",
+            description: "Update message status.\n\n The message status can be `pending`, `error` or `delivered`\n\n`pending` -> message will be sent to the target or source interface\n`error` -> have some problem when tried to send the message\n`delivered` -> the message has been sent with success",
             params: z.object({
                 projectId: z.string(),
                 interfaceId: z.string(),
