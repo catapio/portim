@@ -1,37 +1,48 @@
+import { IClient } from "./Client"
+import { IInterface } from "./Interface"
+
 export interface IProject {
     id: string
     name: string
-    createdAt: Date
-    updatedAt: Date
     ownerId: string
     users: string[]
+    interfaces?: IInterface[]
+    clients?: IClient[]
+    createdAt: Date
+    updatedAt: Date
 }
 
-export class Project {
+export class Project implements IProject {
     id: string
     name: string
-    createdAt: Date
-    updatedAt: Date
     ownerId: string
     users: string[]
+    interfaces?: IInterface[]
+    clients?: IClient[]
+    createdAt: Date
+    updatedAt: Date
 
-    constructor({ id, name, createdAt, updatedAt, ownerId, users }: IProject) {
+    constructor({ id, name, createdAt, updatedAt, ownerId, users, interfaces, clients }: IProject) {
         this.id = id
         this.name = name
-        this.createdAt = createdAt
-        this.updatedAt = updatedAt
         this.ownerId = ownerId
         this.users = users
+        this.interfaces = interfaces
+        this.clients = clients
+        this.createdAt = createdAt
+        this.updatedAt = updatedAt
     }
 
     toJSON() {
         return {
             id: this.id,
             name: this.name,
-            createdAt: this.createdAt.toISOString(),
-            updatedAt: this.updatedAt.toISOString(),
             ownerId: this.ownerId,
             users: this.users,
+            interfaces: this.interfaces,
+            clients: this.clients,
+            createdAt: this.createdAt.toISOString(),
+            updatedAt: this.updatedAt.toISOString(),
         };
     }
 

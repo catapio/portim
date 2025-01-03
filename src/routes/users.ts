@@ -2,10 +2,14 @@ import z from "zod";
 import { FastifyTypedInstance } from "../types";
 import { IUserUseCases } from "../usecases/users";
 
+const defaultSchema = {
+    tags: ["Users"]
+}
+
 export async function userRoutes(app: FastifyTypedInstance, userUseCases: IUserUseCases) {
     app.post("/users/signup", {
         schema: {
-            tags: ["Users"],
+            ...defaultSchema,
             description: "Create a new user",
             consumes: ['application/x-www-form-urlencoded'],
             body: z.object({
@@ -34,7 +38,7 @@ export async function userRoutes(app: FastifyTypedInstance, userUseCases: IUserU
 
     app.post("/users/signin", {
         schema: {
-            tags: ["Users"],
+            ...defaultSchema,
             description: "Authenticate user",
             consumes: ['application/x-www-form-urlencoded'],
             body: z.object({

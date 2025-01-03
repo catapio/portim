@@ -19,6 +19,18 @@ import { ProjectService } from "./services/projects"
 import { PrismaClient } from "@prisma/client"
 import { UserUseCases } from "./usecases/users"
 import { ProjectUseCases } from "./usecases/projects"
+import { InterfaceService } from "./services/interfaces"
+import { ClientService } from "./services/clients"
+import { SessionService } from "./services/sessions"
+import { MessageService } from "./services/messages"
+import { InterfaceUseCases } from "./usecases/interfaces"
+import { ClientUseCases } from "./usecases/clients"
+import { SessionUseCases } from "./usecases/sessions"
+import { MessageUseCases } from "./usecases/messages"
+import { interfaceRoutes } from "./routes/interfaces"
+import { clientRoutes } from "./routes/clients"
+import { sessionRoutes } from "./routes/sessions"
+import { messageRoutes } from "./routes/messages"
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -139,14 +151,26 @@ const prisma = new PrismaClient()
 // create services
 const userService = new UserService(auth)
 const projectService = new ProjectService(prisma)
+const interfaceService = new InterfaceService(prisma)
+const clientService = new ClientService(prisma)
+const sessionService = new SessionService(prisma)
+const messageService = new MessageService(prisma)
 
 // create use cases
 const userUseCases = new UserUseCases(userService)
 const projectUseCases = new ProjectUseCases(userService, projectService)
+const interfaceUseCases = new InterfaceUseCases(interfaceService)
+const clientUseCases = new ClientUseCases(clientService)
+const sessionUseCases = new SessionUseCases(sessionService, interfaceService)
+const messageUseCases = new MessageUseCases(messageService, sessionService, clientService, interfaceService)
 
 authRoutes(app)
 app.register((app) => userRoutes(app, userUseCases))
 app.register((app) => projectRoutes(app, authorization, projectUseCases))
+app.register((app) => interfaceRoutes(app, authorization, interfaceUseCases))
+app.register((app) => clientRoutes(app, authorization, clientUseCases))
+app.register((app) => sessionRoutes(app, authorization, sessionUseCases))
+app.register((app) => messageRoutes(app, authorization, messageUseCases))
 
 app.setErrorHandler((error, request, reply) => {
     if (!error.statusCode || error.statusCode === 500) {

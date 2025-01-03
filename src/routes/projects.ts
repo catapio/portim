@@ -4,16 +4,20 @@ import { Authorization } from "../middlewares/authorize";
 import { CommonError } from "../utils/commonError";
 import { ProjectUseCases } from "../usecases/projects";
 
+const defaultSchema = {
+    security: [
+        {
+            bearerAuth: [],
+        },
+    ],
+    tags: ["Projects"]
+}
+
 export async function projectRoutes(app: FastifyTypedInstance, authorization: Authorization, projectUseCases: ProjectUseCases) {
     app.post("/projects", {
         preHandler: authorization.authorize,
         schema: {
-            security: [
-                {
-                    bearerAuth: [],
-                },
-            ],
-            tags: ["Projects"],
+            ...defaultSchema,
             description: "Create project",
             body: z.object({
                 name: z.string()
@@ -50,12 +54,7 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
     app.get("/projects/:projectId", {
         preHandler: authorization.authorize,
         schema: {
-            security: [
-                {
-                    bearerAuth: [],
-                },
-            ],
-            tags: ["Projects"],
+            ...defaultSchema,
             description: "Fetch a project",
             params: z.object({
                 projectId: z.string()
@@ -85,12 +84,7 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
     app.patch("/projects/:projectId/addUser", {
         preHandler: authorization.authorize,
         schema: {
-            security: [
-                {
-                    bearerAuth: [],
-                },
-            ],
-            tags: ["Projects"],
+            ...defaultSchema,
             description: "Add user to a project",
             params: z.object({
                 projectId: z.string()
@@ -134,12 +128,7 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
     app.patch("/projects/:projectId/removeUser", {
         preHandler: authorization.authorize,
         schema: {
-            security: [
-                {
-                    bearerAuth: [],
-                },
-            ],
-            tags: ["Projects"],
+            ...defaultSchema,
             description: "Add user to a project",
             params: z.object({
                 projectId: z.string()
@@ -183,12 +172,7 @@ export async function projectRoutes(app: FastifyTypedInstance, authorization: Au
     app.delete("/projects/:projectId", {
         preHandler: authorization.authorize,
         schema: {
-            security: [
-                {
-                    bearerAuth: [],
-                },
-            ],
-            tags: ["Projects"],
+            ...defaultSchema,
             description: "Delete a project",
             params: z.object({
                 projectId: z.string()

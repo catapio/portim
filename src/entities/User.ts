@@ -6,7 +6,7 @@ export interface IUser {
     projects: string[]
 }
 
-export class User {
+export class User implements IUser {
     id: string
     email: string
     firstName: string
