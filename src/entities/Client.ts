@@ -1,4 +1,4 @@
-import { ISession } from "./Sessions"
+import { ISession } from "./Session"
 
 export interface IClient {
     id: string
