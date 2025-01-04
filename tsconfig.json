@@ -5,6 +5,10 @@
     "include": [
         "src/**/*.ts"
     ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ],
     "compilerOptions": {
         "lib": [
             "es2023"
@@ -15,6 +19,10 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "moduleResolution": "node16",
-        "outDir": "dist"
+        "outDir": "dist",
+        "baseUrl": "./",
+        "types": [
+            "jest"
+        ],
     }
 }

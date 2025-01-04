@@ -49,46 +49,53 @@ export class MessageUseCases implements IMessageUseCases {
         this.interfaceService = interfaceService
     }
 
+    private async handleNoSessionIdMessage(body: Record<string, unknown>, projectId: string, interfaceId: string) {
+        const interfaceInst = await this.interfaceService.findById(interfaceId)
+        const externalId = getValueFromPath(body, interfaceInst.externalIdField)
+
+        if (!interfaceInst.control) throw new CommonError("If no sessionId passed the interface must have a default control interface")
+        if (!externalId) throw new CommonError("No external id found") // in future will be make a bypass
+
+        let client: Client
+        try {
+            client = await this.clientService.findByExternalId(externalId)
+        } catch (err: any) {
+            logger.debug(`no client found, creating new one. error: ${err.message}`)
+            const newClient = new Client({
+                id: "",
+                externalId: String(externalId),
+                metadata: {},
+                projectId,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            })
+
+            client = await this.clientService.create(newClient)
+        }
+
+        let session: Session | null = null
+        try {
+            session = await this.sessionService.findBySource(interfaceId, client.id)
+        } catch (err) {
+            const newSession = new Session({
+                id: "",
+                source: interfaceId,
+                target: interfaceInst.control,
+                clientId: client.id,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            })
+
+            session = await this.sessionService.create(newSession)
+        }
+
+        return session
+    }
+
     async createMessage({ sender, body, status }: CreateMessageDTO, projectId: string, interfaceId: string, sessionId?: string) {
         let session: Session | null = null
         if (!sessionId) {
-            const interfaceInst = await this.interfaceService.findById(interfaceId)
-            const externalId = getValueFromPath(body, interfaceInst.externalIdField)
-
-            if (!interfaceInst.control) throw new CommonError("If no sessionId passed the interface must have a default control interface")
-            if (!externalId) throw new CommonError("No external id found") // in future will be make a bypass
-
-            let client: Client
-            try {
-                client = await this.clientService.findByExternalId(externalId)
-            } catch (err: any) {
-                logger.debug(`no client found, creating new one. error: ${err.message}`)
-                const newClient = new Client({
-                    id: "",
-                    externalId: String(externalId),
-                    metadata: {},
-                    projectId,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                })
-
-                client = await this.clientService.create(newClient)
-            }
-
-            try {
-                session = await this.sessionService.findBySource(interfaceId, client.id)
-            } catch (err) {
-                const newSession = new Session({
-                    id: "",
-                    source: interfaceId,
-                    target: interfaceInst.control,
-                    clientId: client.id,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                })
-
-                session = await this.sessionService.create(newSession)
-            }
+            session = await this.handleNoSessionIdMessage(body, projectId, interfaceId)
         } else {
             session = await this.sessionService.findById(sessionId)
         }
