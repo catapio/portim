@@ -1,6 +1,6 @@
 # Portim
 
-[![CI](https://github.com/catapio/portim/actions/workflows/ci.yml/badge.svg)](https://github.com/catapio/portim/actions/workflows/ci.yml)
+[![CI](https://github.com/catapio/portim/actions/workflows/fly-deploy.yml/badge.svg)](https://github.com/catapio/portim/actions/workflows/fly-deploy.yml)
 [![Documentation](https://img.shields.io/badge/docs-portim.catap.io-blue)](https://portim.catap.io/docs)
 
 - [What is this?](#what-is-this)
