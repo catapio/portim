@@ -7,8 +7,8 @@ import { logger } from "../utils/logger";
 export interface CreateInterfaceDTO {
     name: string
     eventEndpoint: string
-    controlEndpoint?: string
-    control?: string
+    controlEndpoint: string
+    control: string | null
     externalIdField: string
 }
 

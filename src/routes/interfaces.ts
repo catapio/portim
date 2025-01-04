@@ -28,11 +28,11 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                     { message: "The URL must starts with 'https'" }
                 ),
                 controlEndpoint: z.string().url().refine(
-                    (url) => url.startsWith("https"),
+                    (url) => url.startsWith("https") || url === "",
                     { message: "The URL must starts with 'https'" }
-                ).optional(),
+                ),
                 externalIdField: z.string(),
-                control: z.string().optional(),
+                control: z.string().nullable(),
             }),
             response: {
                 201: z.object({

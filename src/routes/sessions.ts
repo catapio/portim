@@ -24,7 +24,6 @@ export async function sessionRoutes(app: FastifyTypedInstance, authorization: Au
             }),
             body: z.object({
                 clientId: z.string(),
-                target: z.string().length(24).optional()
             }),
             response: {
                 201: z.object({
