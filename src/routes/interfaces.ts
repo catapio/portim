@@ -27,10 +27,13 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                     (url) => url.startsWith("https"),
                     { message: "The URL must starts with 'https'" }
                 ),
-                controlEndpoint: z.string().url().refine(
-                    (url) => url.startsWith("https") || url === "",
-                    { message: "The URL must starts with 'https'" }
-                ),
+                controlEndpoint: z.union([
+                    z.string().url().refine(
+                        (url) => url.startsWith("https"),
+                        { message: "The URL must starts with 'https'" }
+                    ),
+                    z.literal("")
+                ]),
                 externalIdField: z.string(),
                 control: z.string().nullable(),
             }),
@@ -43,6 +46,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                     control: z.string().nullable(),
                     externalIdField: z.string(),
                     projectId: z.string(),
+                    secret: z.string(),
                     createdAt: z.date(),
                     updatedAt: z.date(),
                 }).describe("Created interface"),
@@ -58,8 +62,11 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
 
         const newInterface = await interfaceUseCases.createInterface(request.body, request.params.projectId)
 
-        request.logger.info(`created new interface. name: ${request.body.name}. id: ${newInterface.id}`)
-        return reply.status(201).send(newInterface)
+        request.logger.info(`created new interface. name: ${request.body.name}. id: ${newInterface.interface.id}`)
+        return reply.status(201).send({
+            ...newInterface.interface,
+            secret: newInterface.secret
+        })
     })
 
     app.get("/projects/:projectId/interfaces/:interfaceId", {

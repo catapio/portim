@@ -29,6 +29,8 @@ model Interface {
     control         String?   @db.VarChar(24) // id of first target interface if it isn't a target interface
     externalIdField String    @map("external_id_field") @db.Text
     projectId       String    @map("project_id") @db.VarChar(24)
+    secretHash      String    @map("secret_hash") @db.Text
+    secretSalt      String    @map("secret_salt") @db.Text
     sessions        Session[]
     createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
     updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz

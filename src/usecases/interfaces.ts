@@ -1,8 +1,10 @@
+import { generateHash } from "src/utils/secretHash";
 import { Interface } from "../entities/Interface";
 import { InterfaceService } from "../services/interfaces";
 import { CommonError } from "../utils/commonError";
 import { isValidPath } from "../utils/getValueFromPath";
 import { logger } from "../utils/logger";
+import crypto from "node:crypto"
 
 export interface CreateInterfaceDTO {
     name: string
@@ -30,7 +32,7 @@ export interface DeleteInterfaceDTO {
 }
 
 export interface IInterfaceUseCases {
-    createInterface: (interfaceData: CreateInterfaceDTO, projectId: string) => Promise<Interface>
+    createInterface: (interfaceData: CreateInterfaceDTO, projectId: string) => Promise<{ interface: Interface; secret: string }>
     getInterface: (interfaceData: GetInterfaceDTO) => Promise<Interface>
     updateInterface: (interfaceData: UpdateInterfaceDTO) => Promise<Interface>
     deleteInterface: (interfaceData: DeleteInterfaceDTO) => Promise<void>
@@ -44,6 +46,9 @@ export class InterfaceUseCases implements IInterfaceUseCases {
     }
 
     async createInterface({ name, eventEndpoint, controlEndpoint, externalIdField, control }: CreateInterfaceDTO, projectId: string) {
+        const secret = crypto.randomBytes(24).toString("hex")
+        const { hash, salt } = generateHash(secret)
+
         const interfaceInst = new Interface({
             id: "",
             name,
@@ -52,6 +57,8 @@ export class InterfaceUseCases implements IInterfaceUseCases {
             control: control || null,
             externalIdField,
             projectId,
+            secretHash: hash,
+            secretSalt: salt,
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -59,7 +66,10 @@ export class InterfaceUseCases implements IInterfaceUseCases {
         const newInterface = await this.interfaceService.create(interfaceInst)
         logger.debug(`created new interface in database. name: ${name}.id: ${newInterface.id} in project id: ${projectId} `)
 
-        return newInterface
+        return {
+            interface: newInterface,
+            secret,
+        }
     }
 
     async getInterface({ interfaceId }: GetInterfaceDTO) {
