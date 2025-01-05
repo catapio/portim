@@ -81,6 +81,8 @@ describe("MessageUseCases", () => {
             control: "control-interface-id",
             externalIdField: "data.id",
             projectId,
+            secretHash: "secret-hash",
+            secretSalt: "secret-salt",
             createdAt: new Date(),
             updatedAt: new Date(),
         });

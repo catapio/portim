@@ -47,6 +47,8 @@ describe("SessionUseCases", () => {
                 control: "control-interface-id",
                 externalIdField: "data.id",
                 projectId: "project-111",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -89,6 +91,8 @@ describe("SessionUseCases", () => {
                 control: "",
                 externalIdField: "data.id",
                 projectId: "project-111",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });

@@ -14,6 +14,13 @@ jest.mock("../../utils/getValueFromPath", () => ({
     isValidPath: jest.fn(),
 }));
 
+jest.mock("../../utils/secretHash", () => ({
+    generateHash: jest.fn().mockReturnValue({
+        hash: "secret-hash",
+        salt: "secret-salt",
+    }),
+}));
+
 describe("InterfaceUseCases", () => {
     let mockInterfaceService: jest.Mocked<InterfaceService>;
     let interfaceUseCases: InterfaceUseCases;
@@ -46,6 +53,8 @@ describe("InterfaceUseCases", () => {
                 controlEndpoint: dto.controlEndpoint,
                 control: dto.control,
                 projectId,
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -66,10 +75,13 @@ describe("InterfaceUseCases", () => {
                     controlEndpoint: dto.controlEndpoint,
                     control: dto.control,
                     externalIdField: dto.externalIdField,
+                    secretHash: "secret-hash",
+                    secretSalt: "secret-salt",
                     projectId,
                 })
             );
-            expect(result).toEqual(createdInterface);
+            expect(result.interface).toEqual(createdInterface);
+            expect(result.secret).toBeDefined();
         });
     });
 
@@ -84,6 +96,8 @@ describe("InterfaceUseCases", () => {
                 control: null,
                 externalIdField: "data.id",
                 projectId: "project-123",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -109,6 +123,8 @@ describe("InterfaceUseCases", () => {
                 control: null,
                 externalIdField: "data.id",
                 projectId: "project-123",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -193,6 +209,8 @@ describe("InterfaceUseCases", () => {
                 eventEndpoint: "event-endpoint",
                 controlEndpoint: "control-endpoint",
                 externalIdField: "external-id-field",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             }));
