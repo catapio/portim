@@ -1,4 +1,4 @@
-import { generateHash } from "src/utils/secretHash";
+import { generateHash } from "../utils/secretHash";
 import { Interface } from "../entities/Interface";
 import { InterfaceService } from "../services/interfaces";
 import { CommonError } from "../utils/commonError";

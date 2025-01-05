@@ -1,10 +1,10 @@
 import { FastifyRequest } from "fastify"
 import { Auth } from "../interfaces/auth"
 import { CommonError } from "../utils/commonError"
-import { InterfaceService } from "src/services/interfaces"
-import { Interface } from "src/entities/Interface"
-import { logger } from "src/utils/logger"
-import { validateSecret } from "src/utils/secretHash"
+import { InterfaceService } from "../services/interfaces"
+import { Interface } from "../entities/Interface"
+import { logger } from "../utils/logger"
+import { validateSecret } from "../utils/secretHash"
 
 export class Authorization {
     auth: Auth
