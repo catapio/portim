@@ -9,7 +9,6 @@ const defaultSchema = {
 
 export async function messageRoutes(app: FastifyTypedInstance, authorization: Authorization, messageUseCases: MessageUseCases) {
     app.post("/projects/:projectId/interfaces/:interfaceId/messages", {
-        preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
             description: "Create message for systems that could not create session previously, the systems that is responsible to start the conversation.\n\nPortim will create new session if is the first message or it will retrieve the session created in database.\n\nThe identification of session comes from externalId configured in interface and the message will be sent to the control interface event endpoint. The sessionId will be added in header `catapio-session-id`",

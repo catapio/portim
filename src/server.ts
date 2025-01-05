@@ -151,7 +151,6 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
     process.exit(1)
 }
 const auth = new Supabase(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
-const authorization = new Authorization(auth)
 const prisma = new PrismaClient()
 
 // create services
@@ -161,6 +160,8 @@ const interfaceService = new InterfaceService(prisma)
 const clientService = new ClientService(prisma)
 const sessionService = new SessionService(prisma)
 const messageService = new MessageService(prisma)
+
+const authorization = new Authorization(auth, interfaceService)
 
 // create use cases
 const userUseCases = new UserUseCases(userService)
