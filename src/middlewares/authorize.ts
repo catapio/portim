@@ -39,9 +39,13 @@ export class Authorization {
                     throw new CommonError("Invalid interface", "Unauthorized", 401)
                 }
 
-                if (interfaceInst.allowedIps && ipRangeCheck(request.ip, interfaceInst.allowedIps)) {
+                if (interfaceInst.allowedIps) {
+                    if (ipRangeCheck(request.ip, interfaceInst.allowedIps)) {
+                        request.projectId = projectId
+                        return
+                    }
+                } else {
                     request.projectId = projectId
-
                     return
                 }
             }
