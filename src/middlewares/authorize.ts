@@ -21,11 +21,11 @@ export class Authorization {
     async authorize(request: FastifyRequest) {
         const authHeader = request.headers['authorization']
         if (!authHeader) {
-            const routePattern = /^\/projects\/([^/]+)\/interfaces\/([^/]+)\/messages$/;
+            const routePattern = /^\/projects\/([^\/]+)\/interfaces\/([^\/]+)\/messages$/
             if (routePattern.test(request.url)) {
                 const { projectId, interfaceId } = request.params as {
-                    projectId: string;
-                    interfaceId: string;
+                    projectId: string
+                    interfaceId: string
                 };
 
                 if (!projectId || !interfaceId) {
