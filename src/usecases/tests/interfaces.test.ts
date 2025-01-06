@@ -45,6 +45,7 @@ describe("InterfaceUseCases", () => {
                 controlEndpoint: "/control",
                 control: "another-interface-id",
                 externalIdField: "data.id",
+                allowedIps: [],
             };
             const projectId = "project-123";
 
@@ -101,6 +102,7 @@ describe("InterfaceUseCases", () => {
                 secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             });
 
             mockInterfaceService.findById.mockResolvedValue(foundInterface);
@@ -128,6 +130,7 @@ describe("InterfaceUseCases", () => {
                 secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             });
 
             mockInterfaceService.findById.mockResolvedValue(existingInterface);
@@ -214,6 +217,7 @@ describe("InterfaceUseCases", () => {
                 secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             });
 
             mockInterfaceService.findById.mockResolvedValue(existingInterface);
@@ -240,6 +244,7 @@ describe("InterfaceUseCases", () => {
                 secretSalt: "new-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             })
 
             mockInterfaceService.update.mockResolvedValue(updatedSecretInterface);
@@ -267,6 +272,7 @@ describe("InterfaceUseCases", () => {
                 secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             }));
 
             await expect(interfaceUseCases.deleteInterface(dto)).resolves.not.toThrow();

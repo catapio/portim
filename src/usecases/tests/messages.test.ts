@@ -85,6 +85,7 @@ describe("MessageUseCases", () => {
             secretSalt: "secret-salt",
             createdAt: new Date(),
             updatedAt: new Date(),
+            allowedIps: [],
         });
 
         it("should create a message for an existing session if sessionId is provided", async () => {

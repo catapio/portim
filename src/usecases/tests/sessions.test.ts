@@ -51,6 +51,7 @@ describe("SessionUseCases", () => {
                 secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: []
             });
 
             mockInterfaceService.findById.mockResolvedValue(interfaceInst);
@@ -95,6 +96,7 @@ describe("SessionUseCases", () => {
                 secretSalt: "secret-salt",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             });
 
             mockInterfaceService.findById.mockResolvedValue(interfaceWithoutControl);
