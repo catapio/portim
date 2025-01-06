@@ -147,6 +147,34 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
         return reply.status(200).send(updatedInstance)
     })
 
+    app.get("/projects/:projectId/interfaces/:interfaceId/secret", {
+        preHandler: authorization.authorize,
+        schema: {
+            ...defaultSchema,
+            description: "Generate a new secret for the interface",
+            params: z.object({
+                projectId: z.string(),
+                interfaceId: z.string(),
+            }),
+            response: {
+                200: z.object({
+                    secret: z.string()
+                }).describe("New secret generated"),
+                401: z.object({
+                    statusCode: z.number().default(401),
+                    error: z.string(),
+                    message: z.string()
+                }).describe("Unauthorized"),
+            }
+        }
+    }, async (request, reply) => {
+        const newSecret = await interfaceUseCases.generateSecret({
+            interfaceId: request.params.interfaceId
+        })
+
+        return reply.status(200).send(newSecret)
+    })
+
     app.delete("/projects/:projectId/instances/:instanceId", {
         preHandler: authorization.authorize,
         schema: {

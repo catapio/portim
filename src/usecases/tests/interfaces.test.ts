@@ -1,8 +1,9 @@
-import { InterfaceUseCases, CreateInterfaceDTO, GetInterfaceDTO, UpdateInterfaceDTO, DeleteInterfaceDTO } from "../interfaces";
+import { InterfaceUseCases, CreateInterfaceDTO, GetInterfaceDTO, UpdateInterfaceDTO, DeleteInterfaceDTO, GenerateSecretDTO } from "../interfaces";
 import { InterfaceService } from "../../services/interfaces";
 import { Interface } from "../../entities/Interface";
 import { CommonError } from "../../utils/commonError";
 import { isValidPath } from "../../utils/getValueFromPath";
+import { generateHash } from "../../utils/secretHash";
 
 jest.mock("../../utils/logger", () => ({
     logger: {
@@ -194,6 +195,59 @@ describe("InterfaceUseCases", () => {
 
             await expect(interfaceUseCases.updateInterface(dto)).rejects.toThrow(CommonError);
             expect(mockInterfaceService.update).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("generateSecret", () => {
+        let existingInterface: Interface;
+
+        beforeEach(() => {
+            existingInterface = new Interface({
+                id: "interface-123",
+                name: "Interface to update",
+                eventEndpoint: "/old-events",
+                controlEndpoint: "/old-control",
+                control: null,
+                externalIdField: "$.data.id",
+                projectId: "project-123",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+
+            mockInterfaceService.findById.mockResolvedValue(existingInterface);
+        });
+
+        it("should generate a new secret for interface without errors", async () => {
+            const dto: GenerateSecretDTO = { interfaceId: "interface-123" };
+
+            (isValidPath as jest.Mock).mockReturnValue(true);
+            (generateHash as jest.Mock).mockReturnValue({
+                hash: "new-hash",
+                salt: "new-salt",
+            });
+
+            const updatedSecretInterface = new Interface({
+                id: "interface-123",
+                name: "Interface to update",
+                eventEndpoint: "/old-events",
+                controlEndpoint: "/old-control",
+                control: null,
+                externalIdField: "$.data.id",
+                projectId: "project-123",
+                secretHash: "new-hash",
+                secretSalt: "new-salt",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            })
+
+            mockInterfaceService.update.mockResolvedValue(updatedSecretInterface);
+
+            const result = await interfaceUseCases.generateSecret(dto)
+
+            expect(result.secret).toBeDefined()
+            expect(mockInterfaceService.update).toHaveBeenCalledWith(updatedSecretInterface);
         });
     });
 
