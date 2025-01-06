@@ -103,6 +103,7 @@ endpoints, control, and external ID fields for a project.
     - **updateInterface**: Updates fields of an existing interface, validating
     that a referenced control interface exists and that externalIdField is valid
     (via isValidPath).
+	- **generateSecret**: Generate a new secret for the interface.
 	- **deleteInterface**: Deletes the interface record.
 
 #### MessageUseCases
@@ -180,6 +181,11 @@ tests to avoid unnecessary output.
 
 Utility functions that help validate or extract nested values from objects. Used
 in cases like verifying a valid external ID path.
+
+#### generateHash / validateSecret
+
+Utility functions that help generate secrect hash and validate it. Used in
+cases like generating a new secret and authorizing a request.
 
 ## Dockerfile
 
