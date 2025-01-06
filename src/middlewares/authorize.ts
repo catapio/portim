@@ -44,7 +44,7 @@ export class Authorization {
                         request.projectId = projectId
                         return
                     }
-                } else {
+                } else if (interfaceInst.control) {
                     request.projectId = projectId
                     return
                 }
