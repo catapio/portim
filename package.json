@@ -21,6 +21,7 @@
         "@supabase/supabase-js": "^2.47.10",
         "fastify": "^5.2.0",
         "fastify-type-provider-zod": "^4.0.2",
+        "ip-range-check": "^0.2.0",
         "prisma": "^6.1.0",
         "winston": "^3.17.0",
         "winston-loki": "^6.1.3",
