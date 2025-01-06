@@ -51,6 +51,7 @@ export class InterfaceService implements IInterfaceService {
                 externalIdField: interfaceInst.externalIdField,
                 secretHash: interfaceInst.secretHash,
                 secretSalt: interfaceInst.secretSalt,
+                allowedIps: interfaceInst.allowedIps
             }
         })
         logger.debug(`created interface in database. id: ${newInterface.id}`)

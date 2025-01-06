@@ -31,6 +31,7 @@ model Interface {
     projectId       String    @map("project_id") @db.VarChar(24)
     secretHash      String    @map("secret_hash") @db.Text
     secretSalt      String    @map("secret_salt") @db.Text
+    allowedIps      String[]  @map("allowed_ips") @db.Text
     sessions        Session[]
     createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
     updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz

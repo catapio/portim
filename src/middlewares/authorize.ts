@@ -5,6 +5,7 @@ import { InterfaceService } from "../services/interfaces"
 import { Interface } from "../entities/Interface"
 import { logger } from "../utils/logger"
 import { validateSecret } from "../utils/secretHash"
+import ipRangeCheck from "ip-range-check"
 
 export class Authorization {
     auth: Auth
@@ -20,6 +21,31 @@ export class Authorization {
     async authorize(request: FastifyRequest) {
         const authHeader = request.headers['authorization']
         if (!authHeader) {
+            const routePattern = /^\/projects\/([^/]+)\/interfaces\/([^/]+)\/messages$/;
+            if (routePattern.test(request.url)) {
+                const { projectId, interfaceId } = request.params as {
+                    projectId: string;
+                    interfaceId: string;
+                };
+
+                if (!projectId || !interfaceId) {
+                    throw new CommonError("No token found", "Unauthorized", 401)
+                }
+
+                let interfaceInst: Interface | null = null
+                try {
+                    interfaceInst = await this.interfaceService.findById(interfaceId)
+                } catch (err) {
+                    throw new CommonError("Invalid interface", "Unauthorized", 401)
+                }
+
+                if (interfaceInst.allowedIps && ipRangeCheck(request.ip, interfaceInst.allowedIps)) {
+                    request.projectId = projectId
+
+                    return
+                }
+            }
+
             throw new CommonError("No token found", "Unauthorized", 401)
         }
 
