@@ -1,3 +1,4 @@
+import { Http } from "src/interfaces/http";
 import { Session } from "../entities/Session";
 import { InterfaceService } from "../services/interfaces";
 import { SessionService } from "../services/sessions";
@@ -32,10 +33,12 @@ export interface ISessionUseCases {
 export class SessionUseCases implements ISessionUseCases {
     private sessionService: SessionService
     private interfaceService: InterfaceService
+    private http: Http
 
-    constructor(sessionService: SessionService, interfaceService: InterfaceService) {
+    constructor(sessionService: SessionService, interfaceService: InterfaceService, http: Http) {
         this.sessionService = sessionService
         this.interfaceService = interfaceService
+        this.http = http
     }
 
     async createSession({ clientId }: CreateSessionDTO, interfaceId: string) {
@@ -63,7 +66,7 @@ export class SessionUseCases implements ISessionUseCases {
         return session
     }
 
-    async updateSession({ sessionId, target }: UpdateSessionDTO) {
+    async updateSession({ sessionId, target, metadata }: UpdateSessionDTO) {
         logger.debug(`update sessin id ${sessionId}`)
         const session = await this.sessionService.findById(sessionId)
 
@@ -73,8 +76,14 @@ export class SessionUseCases implements ISessionUseCases {
 
         const sessionUpdated = await this.sessionService.update(session)
 
-        // const interfaceInst = await this.interfaceService.findById(sessionUpdated.target)
-        // call control event if exists with metadata object
+        const interfaceInst = await this.interfaceService.findById(sessionUpdated.target)
+        if (interfaceInst.controlEndpoint) {
+            await this.http.post(interfaceInst.controlEndpoint, metadata, {
+                headers: {
+                    "catapio-session-id": session.id
+                }
+            })
+        }
 
         logger.debug(`updated session id ${sessionUpdated.id}`)
         return sessionUpdated
