@@ -76,6 +76,7 @@ model Message {
     sender    String   @db.Text
     content   String   @db.Text // hash of the body request
     status    String   @db.VarChar(20)
+    error     String?  @db.Text // text of the error if status error
     createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
     updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 

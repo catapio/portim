@@ -132,6 +132,7 @@ describe("MessageUseCases", () => {
                 status: "pending",
                 sender: dto.sender,
                 content: "sha256hash",
+                error: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -163,7 +164,7 @@ describe("MessageUseCases", () => {
 
         it("should create a message for an existing session if sessionId is provided and update with status error when message was not sent", async () => {
             mockHttp.post.mockImplementation(() => {
-                return Promise.reject("http error")
+                return Promise.reject(new Error("http error"))
             })
 
             const sessionId = "session-abc";
@@ -191,6 +192,7 @@ describe("MessageUseCases", () => {
                 status: "pending",
                 sender: dto.sender,
                 content: "sha256hash",
+                error: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -215,6 +217,7 @@ describe("MessageUseCases", () => {
                     sessionId: sessionId,
                     sender: dto.sender,
                     status: "error",
+                    error: "http error",
                 })
             )
             expect(result).toBe(createdMessage);
@@ -266,6 +269,7 @@ describe("MessageUseCases", () => {
                 status: dto.status,
                 sender: dto.sender,
                 content: "sha256-hash-value",
+                error: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -370,6 +374,7 @@ describe("MessageUseCases", () => {
                 status: "pending",
                 sender: dto.sender,
                 content: "sha256hash",
+                error: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -399,6 +404,7 @@ describe("MessageUseCases", () => {
                 status: "pending",
                 sender: "interface-xyz",
                 content: "hashed-content",
+                error: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -425,6 +431,7 @@ describe("MessageUseCases", () => {
                 status: "pending",
                 sender: "interface-xyz",
                 content: "somehash",
+                error: null,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -459,6 +466,7 @@ describe("MessageUseCases", () => {
                 status: "pending",
                 content: "content",
                 sessionId: "sessionId",
+                error: null,
                 createdAt: new Date(),
                 updatedAt: new Date()
             }));

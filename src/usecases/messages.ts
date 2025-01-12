@@ -117,6 +117,7 @@ export class MessageUseCases implements IMessageUseCases {
             id: "",
             sessionId: session.id,
             status,
+            error: null,
             sender,
             content: crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex"),
             createdAt: new Date(),
@@ -137,7 +138,7 @@ export class MessageUseCases implements IMessageUseCases {
 
         await this.http.post(interfaceToSendMessage.eventEndpoint, body, {
             headers: {
-                "catapipo-session-id": session.id,
+                "catapio-session-id": session.id,
                 ...headers,
             }
         }).then(async () => {
@@ -145,10 +146,11 @@ export class MessageUseCases implements IMessageUseCases {
 
             newMessage.status = "delivered"
             await this.messageService.update(newMessage)
-        }).catch(async () => {
+        }).catch(async (err: any) => {
             logger.debug(`error sending message. updating message status of session ${session.id}`)
 
             newMessage.status = "error"
+            newMessage.error = err.message
             await this.messageService.update(newMessage)
         })
 
