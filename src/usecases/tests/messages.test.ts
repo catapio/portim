@@ -10,6 +10,7 @@ import { Client } from "../../entities/Client";
 import { CommonError } from "../../utils/commonError";
 import { getValueFromPath } from "../../utils/getValueFromPath";
 import { logger } from "../../utils/logger";
+import { Http } from "src/interfaces/http";
 
 jest.mock("../../utils/logger", () => ({
     logger: {
@@ -27,6 +28,7 @@ describe("MessageUseCases", () => {
     let mockSessionService: jest.Mocked<SessionService>;
     let mockClientService: jest.Mocked<ClientService>;
     let mockInterfaceService: jest.Mocked<InterfaceService>;
+    let mockHttp: jest.Mocked<Http>;
     let messageUseCases: MessageUseCases;
 
     beforeEach(() => {
@@ -59,11 +61,27 @@ describe("MessageUseCases", () => {
             delete: jest.fn(),
         } as unknown as jest.Mocked<InterfaceService>;
 
+        mockHttp = {
+            get: jest.fn().mockImplementation(() => {
+                return Promise.resolve({});
+            }),
+            post: jest.fn().mockImplementation(() => {
+                return Promise.resolve({});
+            }),
+            put: jest.fn().mockImplementation(() => {
+                return Promise.resolve({});
+            }),
+            delete: jest.fn().mockImplementation(() => {
+                return Promise.resolve({});
+            }),
+        } as unknown as jest.Mocked<Http>;
+
         messageUseCases = new MessageUseCases(
             mockMessageService,
             mockSessionService,
             mockClientService,
-            mockInterfaceService
+            mockInterfaceService,
+            mockHttp,
         );
 
         jest.clearAllMocks();
@@ -91,6 +109,7 @@ describe("MessageUseCases", () => {
         it("should create a message for an existing session if sessionId is provided", async () => {
             const sessionId = "session-abc";
             const dto: CreateMessageDTO = {
+                headers: {},
                 sender: "interface-123",
                 status: "pending",
                 body: { foo: "bar" },
@@ -131,11 +150,79 @@ describe("MessageUseCases", () => {
                 })
             );
             expect(mockInterfaceService.findById).toHaveBeenCalledTimes(1); // We call once to log "call source" or "call target"
+            expect(mockHttp.post).toHaveBeenCalled()
+            expect(mockMessageService.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    sessionId: sessionId,
+                    sender: dto.sender,
+                    status: "delivered",
+                })
+            )
+            expect(result).toBe(createdMessage);
+        });
+
+        it("should create a message for an existing session if sessionId is provided and update with status error when message was not sent", async () => {
+            mockHttp.post.mockImplementation(() => {
+                return Promise.reject("http error")
+            })
+
+            const sessionId = "session-abc";
+            const dto: CreateMessageDTO = {
+                headers: {},
+                sender: "interface-123",
+                status: "pending",
+                body: { foo: "bar" },
+            };
+
+            const existingSession = new Session({
+                id: sessionId,
+                source: interfaceId,
+                clientId: "client-123",
+                target: "control-interface-id",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+
+            mockSessionService.findById.mockResolvedValue(existingSession);
+
+            const createdMessage = new Message({
+                id: "message-999",
+                sessionId: sessionId,
+                status: "pending",
+                sender: dto.sender,
+                content: "sha256hash",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+            mockMessageService.create.mockResolvedValue(createdMessage);
+
+            mockInterfaceService.findById.mockResolvedValue(defaultInterface);
+
+            const result = await messageUseCases.createMessage(dto, projectId, interfaceId, sessionId);
+
+            expect(mockSessionService.findById).toHaveBeenCalledWith(sessionId);
+            expect(mockMessageService.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    sessionId: sessionId,
+                    sender: dto.sender,
+                    status: dto.status,
+                })
+            );
+            expect(mockInterfaceService.findById).toHaveBeenCalledTimes(1); // We call once to log "call source" or "call target"
+            expect(mockHttp.post).toHaveBeenCalled()
+            expect(mockMessageService.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    sessionId: sessionId,
+                    sender: dto.sender,
+                    status: "error",
+                })
+            )
             expect(result).toBe(createdMessage);
         });
 
         it("should create a message and create a new session if sessionId is not provided", async () => {
             const dto: CreateMessageDTO = {
+                headers: {},
                 sender: interfaceId,
                 status: "pending",
                 body: { foo: "bar" },
@@ -206,11 +293,20 @@ describe("MessageUseCases", () => {
                     status: dto.status,
                 })
             );
+            expect(mockHttp.post).toHaveBeenCalled()
+            expect(mockMessageService.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    sessionId: newSession.id,
+                    sender: dto.sender,
+                    status: "delivered",
+                })
+            )
             expect(result).toEqual(createdMessage);
         });
 
         it("should throw CommonError if the interface has no control and no sessionId is provided", async () => {
             const dto: CreateMessageDTO = {
+                headers: {},
                 sender: interfaceId,
                 status: "pending",
                 body: {},
@@ -231,6 +327,7 @@ describe("MessageUseCases", () => {
 
         it("should throw CommonError if the externalId is not found", async () => {
             const dto: CreateMessageDTO = {
+                headers: {},
                 sender: interfaceId,
                 status: "RECEIVED",
                 body: {},
@@ -250,6 +347,7 @@ describe("MessageUseCases", () => {
         it("should call the target endpoint if session.source is the sender, otherwise call the source endpoint", async () => {
             const sessionId = "session-abc";
             const dto: CreateMessageDTO = {
+                headers: {},
                 sender: "some-other-interface",
                 status: "pending",
                 body: { foo: "bar" },
@@ -288,7 +386,7 @@ describe("MessageUseCases", () => {
 
             // Because session.source !== sender => calling source endpoint
             expect(mockInterfaceService.findById).toHaveBeenCalledWith(interfaceId);
-            expect(logger.info).toHaveBeenCalledWith(`call source endpoint ${interfaceSource.eventEndpoint}`);
+            expect(logger.info).toHaveBeenCalledWith(`sending message to source. sessionId: ${sessionId} to interfaceId: ${interfaceSource.id}`);
         });
     });
 

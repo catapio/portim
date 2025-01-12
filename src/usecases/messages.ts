@@ -135,7 +135,7 @@ export class MessageUseCases implements IMessageUseCases {
             logger.info(`sending message to source. sessionId: ${session.id} to interfaceId: ${interfaceToSendMessage.id}`)
         }
 
-        this.http.post(interfaceToSendMessage.eventEndpoint, body, {
+        await this.http.post(interfaceToSendMessage.eventEndpoint, body, {
             headers: {
                 "catapipo-session-id": session.id,
                 ...headers,

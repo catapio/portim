@@ -4,6 +4,7 @@ import { InterfaceService } from "../../services/interfaces";
 import { Session } from "../../entities/Session";
 import { Interface } from "../../entities/Interface";
 import { CommonError } from "../../utils/commonError";
+import { Http } from "src/interfaces/http";
 
 jest.mock("../../utils/logger", () => ({
     logger: {
@@ -15,6 +16,7 @@ describe("SessionUseCases", () => {
     let mockSessionService: jest.Mocked<SessionService>;
     let mockInterfaceService: jest.Mocked<InterfaceService>;
     let sessionUseCases: SessionUseCases;
+    let mockHttp: jest.Mocked<Http>;
 
     beforeEach(() => {
         mockSessionService = {
@@ -31,7 +33,14 @@ describe("SessionUseCases", () => {
             delete: jest.fn(),
         } as unknown as jest.Mocked<InterfaceService>;
 
-        sessionUseCases = new SessionUseCases(mockSessionService, mockInterfaceService);
+        mockHttp = {
+            get: jest.fn(),
+            post: jest.fn(),
+            put: jest.fn(),
+            delete: jest.fn(),
+        } as unknown as jest.Mocked<Http>;
+
+        sessionUseCases = new SessionUseCases(mockSessionService, mockInterfaceService, mockHttp);
     });
 
     describe("createSession", () => {
@@ -155,6 +164,7 @@ describe("SessionUseCases", () => {
             const result = await sessionUseCases.updateSession(dto);
 
             expect(mockSessionService.findById).toHaveBeenCalledWith(dto.sessionId);
+            expect(mockHttp.post).toHaveBeenCalled()
             expect(mockSessionService.update).toHaveBeenCalledWith(
                 expect.objectContaining({
                     id: existingSession.id,
