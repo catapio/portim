@@ -17,7 +17,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
-            description: "Create interface.\n\nInterfaces are the entrypoint for messages send by users and applications, are the way that a conversation session flows",
+            description: "Create interface.\n\nInterfaces are the entrypoint for messages send by users and applications, are the way that a conversation session flows.\n\nYou have to define a secret for interfaces that will answer the source interface and add a secret token for incoming messages for your applications. That way you can validate if is a valid message by the header `catapio-secret-token`",
             params: z.object({
                 projectId: z.string()
             }),
