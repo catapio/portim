@@ -58,6 +58,8 @@ describe("SessionUseCases", () => {
                 projectId: "project-111",
                 secretHash: "secret-hash",
                 secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowedIps: []
@@ -103,6 +105,8 @@ describe("SessionUseCases", () => {
                 projectId: "project-111",
                 secretHash: "secret-hash",
                 secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowedIps: [],
@@ -143,6 +147,25 @@ describe("SessionUseCases", () => {
                 target: "new-target",
                 metadata: { someKey: "someValue" },
             };
+
+            const interfaceInst = new Interface({
+                id: "interface-123",
+                name: "Interface with control",
+                eventEndpoint: "/events",
+                controlEndpoint: "/control",
+                control: "control-interface-id",
+                externalIdField: "data.id",
+                projectId: "project-111",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                allowedIps: []
+            });
+
+            mockInterfaceService.findById.mockResolvedValue(interfaceInst);
 
             const existingSession = new Session({
                 id: "session-987",

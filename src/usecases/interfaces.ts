@@ -13,6 +13,7 @@ export interface CreateInterfaceDTO {
     control: string | null
     externalIdField: string
     allowedIps: string[]
+    secretToken: string | null
 }
 
 export interface GetInterfaceDTO {
@@ -29,6 +30,7 @@ export interface UpdateInterfaceDTO {
     secretHash?: string
     secretSalt?: string
     allowedIps?: string[]
+    secretToken?: string
 }
 
 export interface GenerateSecretDTO {
@@ -54,7 +56,7 @@ export class InterfaceUseCases implements IInterfaceUseCases {
         this.interfaceService = interfaceService
     }
 
-    async createInterface({ name, eventEndpoint, controlEndpoint, externalIdField, control, allowedIps }: CreateInterfaceDTO, projectId: string) {
+    async createInterface({ name, eventEndpoint, controlEndpoint, externalIdField, control, allowedIps, secretToken }: CreateInterfaceDTO, projectId: string) {
         const secret = crypto.randomBytes(24).toString("hex")
         const { hash, salt } = generateHash(secret)
 
@@ -69,6 +71,8 @@ export class InterfaceUseCases implements IInterfaceUseCases {
             secretHash: hash,
             secretSalt: salt,
             allowedIps: allowedIps,
+            secretToken,
+            ivToken: null,
             createdAt: new Date(),
             updatedAt: new Date(),
         })
@@ -88,7 +92,7 @@ export class InterfaceUseCases implements IInterfaceUseCases {
         return interfaceInst
     }
 
-    async updateInterface({ interfaceId, name, eventEndpoint, controlEndpoint, externalIdField, control, secretHash, secretSalt, allowedIps }: UpdateInterfaceDTO) {
+    async updateInterface({ interfaceId, name, eventEndpoint, controlEndpoint, externalIdField, control, secretHash, secretSalt, allowedIps, secretToken }: UpdateInterfaceDTO) {
         logger.debug(`update interface id ${interfaceId} `)
         const interfaceInst = await this.interfaceService.findById(interfaceId)
         if (control) {
@@ -108,6 +112,7 @@ export class InterfaceUseCases implements IInterfaceUseCases {
         interfaceInst.secretHash = secretHash || interfaceInst.secretHash
         interfaceInst.secretSalt = secretSalt || interfaceInst.secretSalt
         interfaceInst.allowedIps = allowedIps || interfaceInst.allowedIps
+        interfaceInst.secretToken = secretToken || interfaceInst.secretToken
 
         if (!isValidPath(interfaceInst.externalIdField)) throw new CommonError("ExternalId path is invalid")
 

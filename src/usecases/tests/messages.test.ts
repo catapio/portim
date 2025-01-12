@@ -101,6 +101,8 @@ describe("MessageUseCases", () => {
             projectId,
             secretHash: "secret-hash",
             secretSalt: "secret-salt",
+            secretToken: "secret-token",
+            ivToken: "iv-token",
             createdAt: new Date(),
             updatedAt: new Date(),
             allowedIps: [],

@@ -11,6 +11,8 @@ export interface IInterface {
     secretHash: string
     secretSalt: string
     allowedIps: string[]
+    secretToken: string | null
+    ivToken: string | null
     sessions?: ISession[]
     createdAt: Date
     updatedAt: Date
@@ -27,11 +29,29 @@ export class Interface implements IInterface {
     secretHash: string
     secretSalt: string
     allowedIps: string[]
+    secretToken: string | null
+    ivToken: string | null
     sessions?: ISession[]
     createdAt: Date
     updatedAt: Date
 
-    constructor({ id, name, eventEndpoint, controlEndpoint, control, externalIdField, projectId, createdAt, updatedAt, secretHash, secretSalt, sessions, allowedIps }: IInterface) {
+    constructor({
+        id,
+        name,
+        eventEndpoint,
+        controlEndpoint,
+        control,
+        externalIdField,
+        projectId,
+        createdAt,
+        updatedAt,
+        secretHash,
+        secretSalt,
+        secretToken,
+        ivToken,
+        sessions,
+        allowedIps
+    }: IInterface) {
         this.id = id
         this.name = name
         this.eventEndpoint = eventEndpoint
@@ -42,6 +62,8 @@ export class Interface implements IInterface {
         this.secretHash = secretHash
         this.secretSalt = secretSalt
         this.allowedIps = allowedIps
+        this.secretToken = secretToken
+        this.ivToken = ivToken
         this.sessions = sessions
         this.createdAt = createdAt
         this.updatedAt = updatedAt
@@ -56,6 +78,7 @@ export class Interface implements IInterface {
             control: this.control,
             externalIdField: this.externalIdField,
             projectId: this.projectId,
+            secretToken: this.secretToken,
             sessions: this.sessions,
             createdAt: this.createdAt.toISOString(),
             updatedAt: this.updatedAt.toISOString(),

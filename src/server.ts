@@ -32,6 +32,7 @@ import { clientRoutes } from "./routes/clients"
 import { sessionRoutes } from "./routes/sessions"
 import { messageRoutes } from "./routes/messages"
 import { Axios } from "./providers/http/axios"
+import { NodeCrypto } from "./providers/encryption/nodeCrypto"
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -154,11 +155,12 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
 const auth = new Supabase(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
 const http = new Axios()
 const prisma = new PrismaClient()
+const encryption = new NodeCrypto()
 
 // create services
 const userService = new UserService(auth)
 const projectService = new ProjectService(prisma)
-const interfaceService = new InterfaceService(prisma)
+const interfaceService = new InterfaceService(prisma, encryption)
 const clientService = new ClientService(prisma)
 const sessionService = new SessionService(prisma)
 const messageService = new MessageService(prisma)

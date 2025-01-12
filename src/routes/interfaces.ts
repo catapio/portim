@@ -37,6 +37,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                 externalIdField: z.string(),
                 control: z.string().nullable(),
                 allowedIps: z.array(z.string()),
+                secretToken: z.string().nullable(),
             }),
             response: {
                 201: z.object({
@@ -49,6 +50,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                     projectId: z.string(),
                     secret: z.string(),
                     allowedIps: z.array(z.string()),
+                    secretToken: z.string().nullable(),
                     createdAt: z.date(),
                     updatedAt: z.date(),
                 }).describe("Created interface"),
@@ -90,6 +92,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                     externalIdField: z.string(),
                     projectId: z.string(),
                     allowedIps: z.array(z.string()),
+                    secretToken: z.string().nullable(),
                     createdAt: z.date(),
                     updatedAt: z.date(),
                 }).describe("Fetched interface"),
@@ -122,6 +125,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                 control: z.string().optional(),
                 externalIdField: z.string().optional(),
                 allowedIps: z.array(z.string()).optional(),
+                secretToken: z.string().optional(),
             }),
             response: {
                 200: z.object({
@@ -133,6 +137,7 @@ export async function interfaceRoutes(app: FastifyTypedInstance, authorization: 
                     externalIdField: z.string(),
                     projectId: z.string(),
                     allowedIps: z.array(z.string()),
+                    secretToken: z.string().nullable(),
                     createdAt: z.date(),
                     updatedAt: z.date(),
                 }).describe("Updated interface"),

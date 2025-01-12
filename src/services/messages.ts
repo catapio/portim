@@ -69,6 +69,7 @@ export class MessageService implements IMessageService {
                     sender: message.sender,
                     sessionId: message.sessionId,
                     status: message.status,
+                    error: message.error,
                     content: message.content,
                 }
             })
