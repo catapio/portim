@@ -80,7 +80,8 @@ export class SessionUseCases implements ISessionUseCases {
         if (interfaceInst.controlEndpoint) {
             await this.http.post(interfaceInst.controlEndpoint, metadata, {
                 headers: {
-                    "catapio-session-id": session.id
+                    "catapio-session-id": session.id,
+                    "catapio-secret-token": interfaceInst.secretToken || ""
                 }
             })
         }

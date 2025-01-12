@@ -139,7 +139,7 @@ export class MessageUseCases implements IMessageUseCases {
         await this.http.post(interfaceToSendMessage.eventEndpoint, body, {
             headers: {
                 "catapio-session-id": session.id,
-                "catapio-scret-token": interfaceToSendMessage.secretToken || "",
+                "catapio-secret-token": interfaceToSendMessage.secretToken || "",
                 ...headers,
             }
         }).then(async () => {
