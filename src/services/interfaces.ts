@@ -2,6 +2,7 @@ import { logger } from "../utils/logger";
 import { CommonError } from "../utils/commonError";
 import { PrismaClient } from "@prisma/client";
 import { Interface } from "../entities/Interface";
+import { Encryption } from "../interfaces/encryption";
 
 export interface IInterfaceService {
     findById: (interfaceId: string) => Promise<Interface>
@@ -12,9 +13,11 @@ export interface IInterfaceService {
 
 export class InterfaceService implements IInterfaceService {
     private prisma: PrismaClient
+    private encryption: Encryption
 
-    constructor(prisma: PrismaClient) {
+    constructor(prisma: PrismaClient, encryption: Encryption) {
         this.prisma = prisma
+        this.encryption = encryption
     }
 
     /**
@@ -32,6 +35,12 @@ export class InterfaceService implements IInterfaceService {
 
         logger.debug(`found interface in database. id: ${interfaceInst.id}`)
 
+        if (interfaceInst.secretToken && interfaceInst.ivToken) {
+            const decryption = this.encryption.decrypt(interfaceInst.secretToken, interfaceInst.ivToken)
+
+            interfaceInst.secretToken = decryption
+        }
+
         return new Interface(interfaceInst)
     }
 
@@ -41,6 +50,15 @@ export class InterfaceService implements IInterfaceService {
     */
     async create(interfaceInst: Interface) {
         logger.debug("creating interface in database")
+
+        const decryptedSecretToken = interfaceInst.secretToken
+        if (interfaceInst.secretToken) {
+            const encryption = this.encryption.encrypt(interfaceInst.secretToken)
+
+            interfaceInst.secretToken = encryption.encryptedData
+            interfaceInst.ivToken = encryption.iv
+        }
+
         const newInterface = await this.prisma.interface.create({
             data: {
                 name: interfaceInst.name,
@@ -49,10 +67,16 @@ export class InterfaceService implements IInterfaceService {
                 eventEndpoint: interfaceInst.eventEndpoint,
                 controlEndpoint: interfaceInst.controlEndpoint,
                 externalIdField: interfaceInst.externalIdField,
+                secretHash: interfaceInst.secretHash,
+                secretSalt: interfaceInst.secretSalt,
+                secretToken: interfaceInst.secretToken,
+                ivToken: interfaceInst.ivToken,
+                allowedIps: interfaceInst.allowedIps
             }
         })
         logger.debug(`created interface in database. id: ${newInterface.id}`)
 
+        newInterface.secretToken = decryptedSecretToken
         return new Interface(newInterface)
     }
 
@@ -61,6 +85,14 @@ export class InterfaceService implements IInterfaceService {
     * @throws {Error} If the update fails.
     */
     async update(interfaceInst: Interface) {
+        const decryptedSecretToken = interfaceInst.secretToken
+        if (interfaceInst.secretToken) {
+            const encryption = this.encryption.encrypt(interfaceInst.secretToken)
+
+            interfaceInst.secretToken = encryption.encryptedData
+            interfaceInst.ivToken = encryption.iv
+        }
+
         try {
             logger.debug(`updating interface in database. id: ${interfaceInst.id}`)
             const interfaceUpdated = await this.prisma.interface.update({
@@ -74,10 +106,13 @@ export class InterfaceService implements IInterfaceService {
                     eventEndpoint: interfaceInst.eventEndpoint,
                     controlEndpoint: interfaceInst.controlEndpoint,
                     externalIdField: interfaceInst.externalIdField,
+                    secretToken: interfaceInst.secretToken,
+                    ivToken: interfaceInst.ivToken,
                 }
             })
             logger.debug(`updated interface in database. id: ${interfaceUpdated.id}`)
 
+            interfaceUpdated.secretToken = decryptedSecretToken
             return new Interface(interfaceUpdated)
         } catch (err) {
             logger.error(err)

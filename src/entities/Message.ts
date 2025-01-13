@@ -4,6 +4,7 @@ export interface IMessage {
     sender: string
     content: string
     status: string
+    error: string | null
     createdAt: Date
     updatedAt: Date
 }
@@ -14,6 +15,7 @@ export class Message implements IMessage {
     sender: string
     content: string
     status: string
+    error: string | null
     createdAt: Date
     updatedAt: Date
 
@@ -23,6 +25,7 @@ export class Message implements IMessage {
         sender,
         content,
         status,
+        error,
         createdAt,
         updatedAt,
     }: IMessage) {
@@ -31,6 +34,7 @@ export class Message implements IMessage {
         this.sender = sender
         this.content = content
         this.status = status
+        this.error = error
         this.createdAt = createdAt
         this.updatedAt = updatedAt
     }
@@ -42,6 +46,7 @@ export class Message implements IMessage {
             sender: this.sender,
             content: this.content,
             status: this.status,
+            error: this.error,
             createdAt: this.createdAt.toISOString(),
             updatedAt: this.updatedAt.toISOString(),
         }

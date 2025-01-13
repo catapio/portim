@@ -1,8 +1,9 @@
-import { InterfaceUseCases, CreateInterfaceDTO, GetInterfaceDTO, UpdateInterfaceDTO, DeleteInterfaceDTO } from "../interfaces";
+import { InterfaceUseCases, CreateInterfaceDTO, GetInterfaceDTO, UpdateInterfaceDTO, DeleteInterfaceDTO, GenerateSecretDTO } from "../interfaces";
 import { InterfaceService } from "../../services/interfaces";
 import { Interface } from "../../entities/Interface";
 import { CommonError } from "../../utils/commonError";
 import { isValidPath } from "../../utils/getValueFromPath";
+import { generateHash } from "../../utils/secretHash";
 
 jest.mock("../../utils/logger", () => ({
     logger: {
@@ -12,6 +13,13 @@ jest.mock("../../utils/logger", () => ({
 
 jest.mock("../../utils/getValueFromPath", () => ({
     isValidPath: jest.fn(),
+}));
+
+jest.mock("../../utils/secretHash", () => ({
+    generateHash: jest.fn().mockReturnValue({
+        hash: "secret-hash",
+        salt: "secret-salt",
+    }),
 }));
 
 describe("InterfaceUseCases", () => {
@@ -37,6 +45,8 @@ describe("InterfaceUseCases", () => {
                 controlEndpoint: "/control",
                 control: "another-interface-id",
                 externalIdField: "data.id",
+                secretToken: "secret-token",
+                allowedIps: [],
             };
             const projectId = "project-123";
 
@@ -46,6 +56,10 @@ describe("InterfaceUseCases", () => {
                 controlEndpoint: dto.controlEndpoint,
                 control: dto.control,
                 projectId,
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -54,6 +68,7 @@ describe("InterfaceUseCases", () => {
                 interfaceInst.id = createdInterface.id
                 interfaceInst.createdAt = createdInterface.createdAt
                 interfaceInst.updatedAt = createdInterface.updatedAt
+                interfaceInst.ivToken = "iv-token"
                 return interfaceInst
             });
 
@@ -66,10 +81,13 @@ describe("InterfaceUseCases", () => {
                     controlEndpoint: dto.controlEndpoint,
                     control: dto.control,
                     externalIdField: dto.externalIdField,
+                    secretHash: "secret-hash",
+                    secretSalt: "secret-salt",
                     projectId,
                 })
             );
-            expect(result).toEqual(createdInterface);
+            expect(result.interface).toEqual(createdInterface);
+            expect(result.secret).toBeDefined();
         });
     });
 
@@ -84,8 +102,13 @@ describe("InterfaceUseCases", () => {
                 control: null,
                 externalIdField: "data.id",
                 projectId: "project-123",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             });
 
             mockInterfaceService.findById.mockResolvedValue(foundInterface);
@@ -109,8 +132,13 @@ describe("InterfaceUseCases", () => {
                 control: null,
                 externalIdField: "data.id",
                 projectId: "project-123",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             });
 
             mockInterfaceService.findById.mockResolvedValue(existingInterface);
@@ -181,6 +209,65 @@ describe("InterfaceUseCases", () => {
         });
     });
 
+    describe("generateSecret", () => {
+        let existingInterface: Interface;
+
+        beforeEach(() => {
+            existingInterface = new Interface({
+                id: "interface-123",
+                name: "Interface to update",
+                eventEndpoint: "/old-events",
+                controlEndpoint: "/old-control",
+                control: null,
+                externalIdField: "$.data.id",
+                projectId: "project-123",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                allowedIps: [],
+            });
+
+            mockInterfaceService.findById.mockResolvedValue(existingInterface);
+        });
+
+        it("should generate a new secret for interface without errors", async () => {
+            const dto: GenerateSecretDTO = { interfaceId: "interface-123" };
+
+            (isValidPath as jest.Mock).mockReturnValue(true);
+            (generateHash as jest.Mock).mockReturnValue({
+                hash: "new-hash",
+                salt: "new-salt",
+            });
+
+            const updatedSecretInterface = new Interface({
+                id: "interface-123",
+                name: "Interface to update",
+                eventEndpoint: "/old-events",
+                controlEndpoint: "/old-control",
+                control: null,
+                externalIdField: "$.data.id",
+                projectId: "project-123",
+                secretHash: "new-hash",
+                secretSalt: "new-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                allowedIps: [],
+            })
+
+            mockInterfaceService.update.mockResolvedValue(updatedSecretInterface);
+
+            const result = await interfaceUseCases.generateSecret(dto)
+
+            expect(result.secret).toBeDefined()
+            expect(mockInterfaceService.update).toHaveBeenCalledWith(updatedSecretInterface);
+        });
+    });
+
     describe("deleteInterface", () => {
         it("should delete the interface without errors", async () => {
             const dto: DeleteInterfaceDTO = { interfaceId: "interface-123" };
@@ -193,8 +280,13 @@ describe("InterfaceUseCases", () => {
                 eventEndpoint: "event-endpoint",
                 controlEndpoint: "control-endpoint",
                 externalIdField: "external-id-field",
+                secretHash: "secret-hash",
+                secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                allowedIps: [],
             }));
 
             await expect(interfaceUseCases.deleteInterface(dto)).resolves.not.toThrow();

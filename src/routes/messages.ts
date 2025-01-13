@@ -4,11 +4,6 @@ import { Authorization } from "../middlewares/authorize";
 import { MessageUseCases } from "../usecases/messages";
 
 const defaultSchema = {
-    security: [
-        {
-            bearerAuth: [],
-        },
-    ],
     tags: ["Messages"]
 }
 
@@ -46,6 +41,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         const newMessage = await messageUseCases.createMessage(
             {
                 body: request.body,
+                headers: request.headers,
                 sender: request.params.interfaceId,
                 status: "pending"
             },
@@ -61,6 +57,14 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
+            security: [
+                {
+                    bearerAuth: [],
+                },
+                {
+                    basicAuth: [],
+                }
+            ],
             description: "Create message for already created sessions and has the sessionId.\n\n The interfaces that has no control interface must use this endpoint to send a new message.\n\nThe sessionId comes in header `catapio-session-id` of the incoming message",
             params: z.object({
                 projectId: z.string(),
@@ -90,6 +94,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
 
         const newMessage = await messageUseCases.createMessage(
             {
+                headers: request.headers,
                 body: request.body,
                 sender: request.params.interfaceId,
                 status: "pending"
@@ -107,6 +112,11 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
+            security: [
+                {
+                    bearerAuth: [],
+                },
+            ],
             description: "Fetch a message",
             params: z.object({
                 projectId: z.string(),
@@ -141,6 +151,11 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
+            security: [
+                {
+                    bearerAuth: [],
+                },
+            ],
             description: "Update message status.\n\n The message status can be `pending`, `error` or `delivered`\n\n`pending` -> message will be sent to the target or source interface\n`error` -> have some problem when tried to send the message\n`delivered` -> the message has been sent with success",
             params: z.object({
                 projectId: z.string(),
@@ -181,6 +196,11 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         preHandler: authorization.authorize,
         schema: {
             ...defaultSchema,
+            security: [
+                {
+                    bearerAuth: [],
+                },
+            ],
             description: "Delete a message",
             params: z.object({
                 projectId: z.string(),
