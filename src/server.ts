@@ -31,6 +31,8 @@ import { interfaceRoutes } from "./routes/interfaces"
 import { clientRoutes } from "./routes/clients"
 import { sessionRoutes } from "./routes/sessions"
 import { messageRoutes } from "./routes/messages"
+import { Axios } from "./providers/http/axios"
+import { NodeCrypto } from "./providers/encryption/nodeCrypto"
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -151,12 +153,14 @@ if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
     process.exit(1)
 }
 const auth = new Supabase(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
+const http = new Axios()
 const prisma = new PrismaClient()
+const encryption = new NodeCrypto()
 
 // create services
 const userService = new UserService(auth)
 const projectService = new ProjectService(prisma)
-const interfaceService = new InterfaceService(prisma)
+const interfaceService = new InterfaceService(prisma, encryption)
 const clientService = new ClientService(prisma)
 const sessionService = new SessionService(prisma)
 const messageService = new MessageService(prisma)
@@ -168,8 +172,8 @@ const userUseCases = new UserUseCases(userService)
 const projectUseCases = new ProjectUseCases(userService, projectService)
 const interfaceUseCases = new InterfaceUseCases(interfaceService)
 const clientUseCases = new ClientUseCases(clientService)
-const sessionUseCases = new SessionUseCases(sessionService, interfaceService)
-const messageUseCases = new MessageUseCases(messageService, sessionService, clientService, interfaceService)
+const sessionUseCases = new SessionUseCases(sessionService, interfaceService, http)
+const messageUseCases = new MessageUseCases(messageService, sessionService, clientService, interfaceService, http)
 
 authRoutes(app)
 app.register((app) => userRoutes(app, userUseCases))

@@ -41,6 +41,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
         const newMessage = await messageUseCases.createMessage(
             {
                 body: request.body,
+                headers: request.headers,
                 sender: request.params.interfaceId,
                 status: "pending"
             },
@@ -93,6 +94,7 @@ export async function messageRoutes(app: FastifyTypedInstance, authorization: Au
 
         const newMessage = await messageUseCases.createMessage(
             {
+                headers: request.headers,
                 body: request.body,
                 sender: request.params.interfaceId,
                 status: "pending"

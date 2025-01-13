@@ -45,6 +45,7 @@ describe("InterfaceUseCases", () => {
                 controlEndpoint: "/control",
                 control: "another-interface-id",
                 externalIdField: "data.id",
+                secretToken: "secret-token",
                 allowedIps: [],
             };
             const projectId = "project-123";
@@ -57,6 +58,8 @@ describe("InterfaceUseCases", () => {
                 projectId,
                 secretHash: "secret-hash",
                 secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
             });
@@ -65,6 +68,7 @@ describe("InterfaceUseCases", () => {
                 interfaceInst.id = createdInterface.id
                 interfaceInst.createdAt = createdInterface.createdAt
                 interfaceInst.updatedAt = createdInterface.updatedAt
+                interfaceInst.ivToken = "iv-token"
                 return interfaceInst
             });
 
@@ -100,6 +104,8 @@ describe("InterfaceUseCases", () => {
                 projectId: "project-123",
                 secretHash: "secret-hash",
                 secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowedIps: [],
@@ -128,6 +134,8 @@ describe("InterfaceUseCases", () => {
                 projectId: "project-123",
                 secretHash: "secret-hash",
                 secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowedIps: [],
@@ -215,6 +223,8 @@ describe("InterfaceUseCases", () => {
                 projectId: "project-123",
                 secretHash: "secret-hash",
                 secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowedIps: [],
@@ -242,6 +252,8 @@ describe("InterfaceUseCases", () => {
                 projectId: "project-123",
                 secretHash: "new-hash",
                 secretSalt: "new-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowedIps: [],
@@ -270,6 +282,8 @@ describe("InterfaceUseCases", () => {
                 externalIdField: "external-id-field",
                 secretHash: "secret-hash",
                 secretSalt: "secret-salt",
+                secretToken: "secret-token",
+                ivToken: "iv-token",
                 createdAt: new Date(),
                 updatedAt: new Date(),
                 allowedIps: [],

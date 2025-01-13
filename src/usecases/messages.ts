@@ -1,3 +1,4 @@
+import { Http } from "src/interfaces/http";
 import { Client } from "../entities/Client";
 import { Message } from "../entities/Message";
 import { Session } from "../entities/Session";
@@ -9,11 +10,13 @@ import { CommonError } from "../utils/commonError";
 import { getValueFromPath } from "../utils/getValueFromPath";
 import { logger } from "../utils/logger";
 import crypto from "node:crypto"
+import { Interface } from "../entities/Interface";
 
 export interface CreateMessageDTO {
     sender: string
     status: string
     body: Record<string, unknown>
+    headers: Record<string, unknown>
 }
 
 export interface GetMessageDTO {
@@ -41,12 +44,20 @@ export class MessageUseCases implements IMessageUseCases {
     private sessionService: SessionService
     private clientService: ClientService
     private interfaceService: InterfaceService
+    private http: Http
 
-    constructor(messageService: MessageService, sessionService: SessionService, clientService: ClientService, interfaceService: InterfaceService) {
+    constructor(
+        messageService: MessageService,
+        sessionService: SessionService,
+        clientService: ClientService,
+        interfaceService: InterfaceService,
+        http: Http,
+    ) {
         this.messageService = messageService
         this.sessionService = sessionService
         this.clientService = clientService
         this.interfaceService = interfaceService
+        this.http = http
     }
 
     private async handleNoSessionIdMessage(body: Record<string, unknown>, projectId: string, interfaceId: string) {
@@ -92,7 +103,7 @@ export class MessageUseCases implements IMessageUseCases {
         return session
     }
 
-    async createMessage({ sender, body, status }: CreateMessageDTO, projectId: string, interfaceId: string, sessionId?: string) {
+    async createMessage({ sender, body, status, headers }: CreateMessageDTO, projectId: string, interfaceId: string, sessionId?: string) {
         let session: Session | null = null
         if (!sessionId) {
             session = await this.handleNoSessionIdMessage(body, projectId, interfaceId)
@@ -106,6 +117,7 @@ export class MessageUseCases implements IMessageUseCases {
             id: "",
             sessionId: session.id,
             status,
+            error: null,
             sender,
             content: crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex"),
             createdAt: new Date(),
@@ -115,13 +127,33 @@ export class MessageUseCases implements IMessageUseCases {
         const newMessage = await this.messageService.create(message)
         logger.debug(`created new message in database. source: ${interfaceId}. sessionId: ${session.id}. id: ${newMessage.id}`)
 
+        let interfaceToSendMessage: Interface | null = null
         if (session.source === sender) {
-            const interfaceTarget = await this.interfaceService.findById(session.target)
-            logger.info(`call target endpoint ${interfaceTarget.eventEndpoint}`)
+            interfaceToSendMessage = await this.interfaceService.findById(session.target)
+            logger.info(`sending message to target. sessionId: ${session.id} to interfaceId: ${interfaceToSendMessage.id}`)
         } else {
-            const interfaceSource = await this.interfaceService.findById(session.source)
-            logger.info(`call source endpoint ${interfaceSource.eventEndpoint}`)
+            interfaceToSendMessage = await this.interfaceService.findById(session.source)
+            logger.info(`sending message to source. sessionId: ${session.id} to interfaceId: ${interfaceToSendMessage.id}`)
         }
+
+        await this.http.post(interfaceToSendMessage.eventEndpoint, body, {
+            headers: {
+                "catapio-session-id": session.id,
+                "catapio-secret-token": interfaceToSendMessage.secretToken || "",
+                ...headers,
+            }
+        }).then(async () => {
+            logger.debug(`message sent with success. updating message status of session ${session.id}`)
+
+            newMessage.status = "delivered"
+            await this.messageService.update(newMessage)
+        }).catch(async (err: any) => {
+            logger.debug(`error sending message. updating message status of session ${session.id}`)
+
+            newMessage.status = "error"
+            newMessage.error = err.message
+            await this.messageService.update(newMessage)
+        })
 
         return newMessage
     }

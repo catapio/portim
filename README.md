@@ -76,7 +76,9 @@ All routes documentation you can find in [Portim Documentation](https://portim.c
     the database via SessionService.
 	- **getSession**: Fetches an existing Session by ID.
     - **updateSession**: Updates session fields (like target) if the new value
-    is non-empty.
+    is non-empty. Updating the target, if control endpoint exists in the target
+    interface, a control event request will be triggered to the endpoint
+    defined.
 	- **deleteSession**: Deletes the session from the database.
 
 #### ProjectUseCases
@@ -96,7 +98,9 @@ All routes documentation you can find in [Portim Documentation](https://portim.c
 #### InterfaceUseCases
 
 - **Purpose**: Deals with creating and managing “interfaces” that define
-endpoints, control, and external ID fields for a project.
+endpoints, control, and external ID fields for a project. It handles the secret
+for sending message authentication and secret token for incoming message
+authorization, with his encryption.
 - **Key Methods**:
     - **createInterface**: Builds a new Interface and saves it to the database.
     - **getInterface**: Fetches an interface by ID.
@@ -118,7 +122,10 @@ and interfaces.
         - Hashes the message body with crypto.createHash("sha256") before
         creating a Message.
         - Depending on who is sending the message (session.source vs. sender),
-        calls the appropriate interface endpoint.
+        calls the appropriate interface endpoint. The request will be send with
+        `catapio-session-id` to have the information about which session the
+        request is and `catapio-secret-token` for authorization/validation of
+        the request.
 	- **getMessage**: Fetches a Message by ID.
 	- **updateMessage**: Updates the status of an existing message.
 	- **deleteMessage**: Removes the message from the database.
